@@ -67,7 +67,7 @@ module.exports = {
     }
 
     const d = new Date();
-    const mockData = Array(+(count || DEFAULT_COUNT)).fill(null).map(() => ({
+    const mockData = Array.from({length: +(count || DEFAULT_COUNT)}).map(() => ({
       title: TITLES[getRandomInt(0, TITLES.length - 1)],
       announce: shuffle(SENTENCES.slice()).slice(0, getRandomInt(1, MAX_ANNOUNCE_COUNT)),
       fullText: shuffle(SENTENCES.slice()).slice(0, getRandomInt(1, SENTENCES.length)),
