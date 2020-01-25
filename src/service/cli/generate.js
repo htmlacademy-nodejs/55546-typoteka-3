@@ -1,6 +1,7 @@
 'use strict';
 
-const fs = require(`fs`);
+const chalk = require(`chalk`);
+const fs = require(`fs`).promises;
 const {getRandomInt, shuffle} = require(`../../utils`);
 
 const EXIT_CODE_ERROR = 1;
@@ -60,29 +61,30 @@ const CATEGORIES = [
 
 module.exports = {
   name: `--generate`,
-  run(count) {
+  async run(count) {
     if (count > 1000) {
-      console.error(`Не больше 1000 объявлений`);
+      console.error(chalk.green(`Не больше 1000 объявлений`));
       process.exit(EXIT_CODE_ERROR);
     }
 
-    const d = new Date();
-    const mockData = Array.from({length: +(count || DEFAULT_COUNT)}).map(() => ({
+    const baseDatetime = new Date();
+    baseDatetime.setMonth(-3);
+
+    const mockData = Array.from({length: +(count || DEFAULT_COUNT)}, () => ({
       title: TITLES[getRandomInt(0, TITLES.length - 1)],
       announce: shuffle(SENTENCES.slice()).slice(0, getRandomInt(1, MAX_ANNOUNCE_COUNT)),
       fullText: shuffle(SENTENCES.slice()).slice(0, getRandomInt(1, SENTENCES.length)),
-      createdDate: `${d.getFullYear()}-${(`` + (d.getMonth() + 1)).padStart(2, `0`)}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`,
+      createdDate: new Date(getRandomInt(+baseDatetime, Date.now())).toISOString().replace(/T/, ` `).replace(/\..*$/, ``),
       category: shuffle(CATEGORIES.slice()).slice(0, getRandomInt(1, CATEGORIES.length - 1)),
     }));
 
-    fs.writeFile(FILE_NAME, JSON.stringify(mockData), (err) => {
-      if (err) {
-        console.error(`Ошибка при записи моковых данных в файл`);
-        process.exit(EXIT_CODE_ERROR);
-      }
-
-      console.log(`Данные успешно сгенерированы`);
-    });
+    try {
+      await fs.writeFile(FILE_NAME, JSON.stringify(mockData));
+      console.log(chalk.green(`Данные успешно сгенерированы`));
+    } catch (err) {
+      console.error(chalk.red(`Ошибка при записи моковых данных в файл`));
+      process.exit(EXIT_CODE_ERROR);
+    }
   }
 };
 
