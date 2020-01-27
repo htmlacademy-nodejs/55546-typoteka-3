@@ -4,6 +4,7 @@
   "description": "* Студент: [Николай Блинов](https://up.htmlacademy.ru/nodejs/3/user/55546). * Наставник: [Сергей Вохмянин](https://htmlacademy.ru/profile/id530823).",
   "main": "./src/service/service.js",
   "scripts": {
+    "server": "nodemon ./src/service/service.js --server",
     "start": "node ./src/service/service.js",
     "test": "npm run eslint",
     "eslint": "eslint --ext .js src/"
@@ -20,7 +21,8 @@
   "homepage": "https://github.com/arcmag/55546-typoteka-3#readme",
   "devDependencies": {
     "eslint": "6.8.0",
-    "eslint-config-htmlacademy": "0.5.2"
+    "eslint-config-htmlacademy": "0.5.2",
+    "nodemon": "2.0.2"
   },
   "dependencies": {
     "chalk": "3.0.0"
