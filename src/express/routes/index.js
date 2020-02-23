@@ -1,47 +1,47 @@
 'use strict';
 
-const {Router: router} = require(`express`);
+const router = require(`express`).Router;
 
 const appRouter = router();
 
 appRouter.get(`/`, (req, res) => {
-  res.send(`/`);
+  res.render(`main`);
 });
 
 appRouter.get(`/register`, (req, res) => {
-  res.send(`/register`);
+  res.render(`registration`);
 });
 
 appRouter.get(`/login`, (req, res) => {
-  res.send(`/login`);
+  res.render(`registration`);
 });
 
 appRouter.get(`/my`, (req, res) => {
-  res.send(`/my`);
+  res.render(`admin-publications`);
 });
 
 appRouter.get(`/my/comments`, (req, res) => {
-  res.send(`/my/comments`);
+  res.render(`admin-comments`);
 });
 
 appRouter.get(`/offers/category/:id`, (req, res) => {
-  res.send(`/offers/category/:id`);
+  res.render(`publications-by-category`);
 });
 
 appRouter.get(`/offers/add`, (req, res) => {
-  res.send(`/offers/add`);
+  res.render(`admin-add-new-post-empty`);
 });
 
 appRouter.get(`/search`, (req, res) => {
-  res.send(`/search`);
+  res.render(`search-1`);
 });
 
 appRouter.get(`/offers/edit/:id`, (req, res) => {
-  res.send(`/offers/edit/:id`);
+  res.render(`admin-add-new-post`);
 });
 
 appRouter.get(`/offers/:id`, (req, res) => {
-  res.send(`/offers/:id`);
+  res.render(`post-user`);
 });
 
 module.exports = appRouter;
