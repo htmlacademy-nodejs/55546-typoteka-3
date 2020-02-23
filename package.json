@@ -6,7 +6,8 @@
   "scripts": {
     "server": "nodemon ./src/service/service.js --server",
     "start": "node ./src/service/service.js",
-    "start-front-server": "nodemon ./src/express/index.js",
+    "start-front-server": "nodemon src/service/service.js --server",
+    "offer-generate": "node src/service/service.js --generate",
     "test": "npm run eslint",
     "eslint": "eslint --ext .js src/"
   },
