@@ -15,6 +15,10 @@ app.use(express.json());
 app.use(express.static(STATIC_DIR));
 
 app.use(appRoutes);
+app.use(`/api/articles`, require(`./routes/api/articles`));
+app.use(`/api/categories`, require(`./routes/api/categories`));
+app.use(`/api/search`, require(`./routes/api/search`));
+
 app.use(`/offers`, require(`./routes/offers`));
 app.use(`/posts`, require(`./routes/posts`));
 

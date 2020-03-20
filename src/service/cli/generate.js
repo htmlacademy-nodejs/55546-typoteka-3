@@ -1,6 +1,7 @@
 'use strict';
 
 const chalk = require(`chalk`);
+const nanoid = require(`nanoid`);
 const fs = require(`fs`).promises;
 const {getRandomInt, shuffle} = require(`../../utils`);
 
@@ -8,6 +9,8 @@ const EXIT_CODE_ERROR = 1;
 const DEFAULT_COUNT = 1;
 const FILE_NAME = `mock.json`;
 const MAX_ANNOUNCE_COUNT = 4;
+const MAX_COMMENTS_COUNT = 10;
+const MAX_COMMENTS_TEXT_COUNT = 5;
 
 const getDataByFile = async (path) => (await fs.readFile(path)).toString().trim().split(`\n`);
 
@@ -22,16 +25,24 @@ module.exports = {
     const titles = await getDataByFile(`data/titles.txt`);
     const sentences = await getDataByFile(`data/sentences.txt`);
     const categories = await getDataByFile(`data/categories.txt`);
+    const comments = await getDataByFile(`data/comments.txt`);
 
     const baseDatetime = new Date();
     baseDatetime.setMonth(-3);
 
     const mockData = Array.from({length: +(count || DEFAULT_COUNT)}, () => ({
+      id: nanoid(),
       title: titles[getRandomInt(0, titles.length - 1)],
       announce: shuffle(sentences.slice()).slice(0, getRandomInt(1, MAX_ANNOUNCE_COUNT)),
       fullText: shuffle(sentences.slice()).slice(0, getRandomInt(1, sentences.length)),
       createdDate: new Date(getRandomInt(+baseDatetime, Date.now())).toISOString().replace(/T/, ` `).replace(/\..*$/, ``),
       category: shuffle(categories.slice()).slice(0, getRandomInt(1, categories.length - 1)),
+      comments: Array.from({length: getRandomInt(1, MAX_COMMENTS_COUNT)}, () => {
+        return {
+          id: nanoid(),
+          text: shuffle(comments.slice()).slice(0, getRandomInt(1, MAX_COMMENTS_TEXT_COUNT))
+        };
+      })
     }));
 
     try {
