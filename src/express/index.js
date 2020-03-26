@@ -28,4 +28,3 @@ app.use(`/offers`, require(`./routes/offers`));
 app.use(`/posts`, require(`./routes/posts`));
 
 module.exports = app;
-// module.exports = (port) => app.listen(port || DEFAULT_PORT);
