@@ -3,20 +3,26 @@
 const router = require(`express`).Router;
 const route = router();
 
-route.get(`/offers/category/:id`, (req, res) => {
+const logger = require(`../../logger`).getLogger();
+
+route.get(`/category/:id`, (req, res) => {
   res.render(`publications-by-category`);
+  logger.info(`Status code ${res.statusCode}`);
 });
 
-route.get(`/offers/add`, (req, res) => {
+route.get(`/add`, (req, res) => {
   res.render(`admin-add-new-post-empty`);
+  logger.info(`Status code ${res.statusCode}`);
 });
 
-route.get(`/offers/edit/:id`, (req, res) => {
+route.get(`/edit/:id`, (req, res) => {
   res.render(`admin-add-new-post`);
+  logger.info(`Status code ${res.statusCode}`);
 });
 
-route.get(`/offers/:id`, (req, res) => {
+route.get(`/:id`, (req, res) => {
   res.render(`post-user`);
+  logger.info(`Status code ${res.statusCode}`);
 });
 
 module.exports = route;

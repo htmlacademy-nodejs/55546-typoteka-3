@@ -40,7 +40,7 @@ module.exports = {
       comments: Array.from({length: getRandomInt(1, MAX_COMMENTS_COUNT)}, () => {
         return {
           id: nanoid(),
-          text: shuffle(comments.slice()).slice(0, getRandomInt(1, MAX_COMMENTS_TEXT_COUNT))
+          text: shuffle(comments.slice()).slice(0, getRandomInt(1, MAX_COMMENTS_TEXT_COUNT)).join(` `)
         };
       })
     }));

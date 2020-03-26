@@ -5,10 +5,15 @@
   "main": "./src/service/service.js",
   "scripts": {
     "server": "nodemon ./src/service/service.js --server",
-    "start": "node ./src/service/service.js",
+
+    "start": "set LOG_LEVEL=error && npm run server > src/service/logs/app.log 2> src/service/logs/error.log",
+    "start::debug": "set LOG_LEVEL=debug && npm run server | pino-pretty > src/service/logs/app.log 2> src/service/logs/error.log",
+
     "start-front-server": "nodemon src/service/service.js --server",
     "offer-generate": "node src/service/service.js --generate",
-    "test": "npm run eslint",
+    "test": "npm run test::eslint && npm run test::rest",
+    "test::rest": "jest",
+    "test::eslint": "npm run eslint",
     "eslint": "eslint --ext .js src/"
   },
   "repository": {
@@ -24,12 +29,16 @@
   "devDependencies": {
     "eslint": "6.8.0",
     "eslint-config-htmlacademy": "0.5.2",
-    "nodemon": "2.0.2"
+    "jest": "25.2.0",
+    "nodemon": "2.0.2",
+    "pino-pretty": "3.6.1",
+    "supertest": "4.0.2"
   },
   "dependencies": {
     "chalk": "3.0.0",
     "express": "4.17.1",
     "nanoid": "^2.1.11",
+    "pino": "5.17.0",
     "pug": "2.0.4"
   }
 }
