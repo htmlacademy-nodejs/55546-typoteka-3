@@ -5,11 +5,9 @@
   "main": "./src/service/service.js",
   "scripts": {
     "server": "nodemon ./src/service/service.js --server",
-
     "start": "set LOG_LEVEL=error && npm run server > src/service/logs/app.log 2> src/service/logs/error.log",
     "start::debug": "set LOG_LEVEL=debug && npm run server | pino-pretty > src/service/logs/app.log 2> src/service/logs/error.log",
-
-    "start-front-server": "nodemon src/service/service.js --server",
+    "start-front-server": "node src/service/service.js --server",
     "offer-generate": "node src/service/service.js --generate",
     "test": "npm run test::eslint && npm run test::rest",
     "test::rest": "jest",
@@ -35,8 +33,10 @@
     "supertest": "4.0.2"
   },
   "dependencies": {
+    "axios": "0.19.2",
     "chalk": "3.0.0",
     "express": "4.17.1",
+    "multer": "1.4.2",
     "nanoid": "^2.1.11",
     "pino": "5.17.0",
     "pug": "2.0.4"

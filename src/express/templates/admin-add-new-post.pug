@@ -9,24 +9,24 @@ block content
             h1 Новая публикация
             .new-publication__date-form
               h3 Дата публикации
-              form(action='#', method='POST')
+              form(action='/article/add', method='POST')
                 .new-publication__date-block
                   label(for='new-publication-date', aria-label='Календарь')
-                  input#new-publication-date(type='text', name='login', placeholder='21.03.2019')
+                  input#new-publication-date(type='text', name='login', placeholder=article.createDate)
             button.new-publication__button.button.button--colored(type='submit') Опубликовать
           button.popup__button.button.button--popup-close(type='button', aria-label='Закрыть окно') Закрыть окно
           .new-publication__form.form
-            form(action='#', method='get')
+            form(action='/article/add', method='POST')
               .form__wrapper.form__wrapper--intro
                 .form__field
                   label
-                    input(type='text', placeholder='Заголовок', value='Как правильно заводить машину', required)
+                    input(name='title', type='text', placeholder='Заголовок', value=article.title, required)
                 .form__field.form__field--post-image
                   label
-                    input#image-name-field(type='text', value='moya_mashinka.jpg', placeholder='Фотография', readonly)
+                    input#image-name-field(name='file-name', type='text', value='moya_mashinka.jpg', placeholder='Фотография', readonly)
                   .form__image-loader.form__image-loader--publication
                     label
-                      input.visually-hidden(type='file')
+                      input.visually-hidden(name='file', type='file')
                       | Обзор
                   button.button.button--transparent Удалить
                 .new-publication__checkbox.new-publication__checkbox--auto
@@ -36,11 +36,11 @@ block content
               .form__wrapper.form__wrapper--text
                 .form__field.form__field--publication-text
                   label
-                    textarea(rows='2', placeholder='Анонс публикации') Материнский холдинг возглавит гендиректор Google Сундар Пичаи. При этом больше половины голосов в компании останется у Пейджа и Брина.
+                    textarea(name='announce', rows='2', placeholder='Анонс публикации')= article.announce
                 .form__field.form__field--publication-text
                   label
-                    textarea(rows='5', placeholder='Полный текст публикации') Основатели Google Ларри Пейдж и Сергей Брин отойдут от руководства материнским холдингом Alphabet, сказано в сообщении компании. Пейдж занимал пост гендиректора, а Брин — президента Alphabet. Alphabet возглавит гендиректор Google Сундар Пичаи, он также продолжит руководить Google. Должность президента холдинга будет упразднена.
+                    textarea(name='fullText', rows='5', placeholder='Полный текст публикации')= article.fullText
       .modal__overlay
 block scripts
-  script(src='js/vendor.js')
-  script(src='js/main.js')
+  script(src='/js/vendor.js')
+  script(src='/js/main.js')

@@ -11,8 +11,10 @@ const shuffle = (someArray) => {
   return someArray;
 };
 
+const getUrlRequest = (req, path) => new URL(path, `http://${(`` + req.headers.host)}`).href;
 
 module.exports = {
   getRandomInt,
-  shuffle
+  shuffle,
+  getUrlRequest,
 };

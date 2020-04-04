@@ -3,10 +3,18 @@ extends layouts/layout.pug
 block content
   main
     section.search-page
-      .search-page__wrapper
+      .search-page__wrapper(class= isEmpty ? 'search-page__wrapper--empty' : '')
         h1 Поиск
         .search.search-page__form
-          form(action='#', method='get')
+          form(action='/search', method='get')
             label
-              input(type='text', placeholder='Что ищем?')
+              input(name='title', type='text', placeholder='Что ищем?' value= title)
             button.search__button.button.button--transparent(type='submit') Найти
+          if !isEmpty
+            each article in articles
+              .search__result
+                time.search__date(datetime=article.createdDate)= article.createdDate
+                a.search__link= article.title
+        if isEmpty
+          p.search-page__empty Ничего не нашлось
+

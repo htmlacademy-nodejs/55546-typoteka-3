@@ -34,7 +34,7 @@ module.exports = {
       id: nanoid(),
       title: titles[getRandomInt(0, titles.length - 1)],
       announce: shuffle(sentences.slice()).slice(0, getRandomInt(1, MAX_ANNOUNCE_COUNT)),
-      fullText: shuffle(sentences.slice()).slice(0, getRandomInt(1, sentences.length)),
+      fullText: shuffle(sentences.slice()).slice(0, getRandomInt(1, sentences.length)).join(` `),
       createdDate: new Date(getRandomInt(+baseDatetime, Date.now())).toISOString().replace(/T/, ` `).replace(/\..*$/, ``),
       category: shuffle(categories.slice()).slice(0, getRandomInt(1, categories.length - 1)),
       comments: Array.from({length: getRandomInt(1, MAX_COMMENTS_COUNT)}, () => {
