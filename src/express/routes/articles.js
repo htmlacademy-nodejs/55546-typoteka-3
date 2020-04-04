@@ -18,8 +18,6 @@ route.get(`/add`, async (req, res) => {
 });
 
 route.post(`/add`, async (req, res) => {
-  console.log(`-------------------add---`, req.body);
-
   res.render(`admin-add-new-post-empty`);
   logger.info(`Status code ${res.statusCode}`);
 });
