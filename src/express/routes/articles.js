@@ -38,7 +38,7 @@ route.post(`/add`, multer({storage: multerStorage}).single(`img`), async (req, r
       }
     });
 
-    res.redirect(`/`);
+    res.redirect(`/my`);
     logger.info(`Status code ${res.statusCode}`);
     return;
   } catch (err) {

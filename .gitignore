@@ -16,5 +16,5 @@ build/
 
 mock.json
 
-src/service/logs
-src/tmp/**/*
+src/tmp/*
+!.placeholder
