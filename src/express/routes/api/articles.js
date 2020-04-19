@@ -29,13 +29,10 @@ route.get(`/:articleId`, async (req, res) => {
 // POST / api / articles — создаёт новую публикацию;
 route.post(`/`, async (req, res) => {
   const keys = [
-    `id`,
     `title`,
     `announce`,
     `fullText`,
     `createdDate`,
-    `category`,
-    `comments`,
   ];
 
   for (const key of keys) {
