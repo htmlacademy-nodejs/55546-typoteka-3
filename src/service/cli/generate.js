@@ -3,7 +3,7 @@
 const chalk = require(`chalk`);
 const nanoid = require(`nanoid`);
 const fs = require(`fs`).promises;
-const {getRandomInt, shuffle} = require(`../../utils`);
+const {getRandomInt, shuffle, getArticleData} = require(`../../utils`);
 
 const EXIT_CODE_ERROR = 1;
 const DEFAULT_COUNT = 1;
@@ -11,8 +11,6 @@ const FILE_NAME = `mock.json`;
 const MAX_ANNOUNCE_COUNT = 4;
 const MAX_COMMENTS_COUNT = 10;
 const MAX_COMMENTS_TEXT_COUNT = 5;
-
-const getDataByFile = async (path) => (await fs.readFile(path)).toString().trim().split(`\n`);
 
 module.exports = {
   name: `--generate`,
@@ -22,10 +20,7 @@ module.exports = {
       process.exit(EXIT_CODE_ERROR);
     }
 
-    const titles = await getDataByFile(`data/titles.txt`);
-    const sentences = await getDataByFile(`data/sentences.txt`);
-    const categories = await getDataByFile(`data/categories.txt`);
-    const comments = await getDataByFile(`data/comments.txt`);
+    const {titles, sentences, categories, comments} = await getArticleData();
 
     const baseDatetime = new Date();
     baseDatetime.setMonth(-3);
