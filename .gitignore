@@ -18,3 +18,5 @@ mock.json
 
 src/tmp/*
 !.placeholder
+
+.env

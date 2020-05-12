@@ -3,7 +3,7 @@
 SELECT id, title FROM categories;
 
 -- Получить список категорий для которых создана минимум одна публикация (идентификатор, наименование категории);
-SELECT id, title FROM categories WHERE EXISTS (SELECT COUNT(*) FROM articles_category WHERE articles_category.category_id = categories.id);
+SELECT id, title FROM categories WHERE EXISTS (SELECT * FROM articles_category WHERE articles_category.category_id = categories.id);
 
 -- Получить список категорий с количеством публикаций (идентификатор, наименование категории, количество публикаций в категории);
 SELECT id, title, (SELECT COUNT(*) FROM articles_category WHERE articles_category.category_id = categories.id) as total FROM categories;
@@ -22,9 +22,9 @@ SELECT
   (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count,
   string_agg(DISTINCT ct.title, ',') as categories
   FROM articles a
-  JOIN users u ON a.author_id = u.id
-  JOIN articles_category oct ON a.id = oct.article_id
-  JOIN categories ct ON oct.category_id = ct.id
+  LEFT JOIN users u ON a.author_id = u.id
+  LEFT JOIN articles_category oct ON a.id = oct.article_id
+  LEFT JOIN categories ct ON oct.category_id = ct.id
   GROUP BY a.id, u.name, u.email
   ORDER BY a.date_create;
 
@@ -42,10 +42,10 @@ SELECT
   (SELECT COUNT(*) FROM comments WHERE article_id = a.id) as comment_count,
   string_agg(DISTINCT ct.title, ',') as categories
   FROM articles a
-  JOIN users u ON a.author_id = u.id
-  JOIN articles_category oct ON a.id = oct.article_id
-  JOIN categories ct ON oct.category_id = ct.id
-  WHERE o.id = 1
+  LEFT JOIN users u ON a.author_id = u.id
+  LEFT JOIN articles_category oct ON a.id = oct.article_id
+  LEFT JOIN categories ct ON oct.category_id = ct.id
+  WHERE a.id = 3
   GROUP BY a.id, u.name, u.email;
 
 -- Получить список из 5 свежих комментариев (идентификатор комментария, идентификатор публикации, имя и фамилия автора, текст комментария);
