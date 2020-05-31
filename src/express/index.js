@@ -8,6 +8,16 @@ const app = express();
 const logger = require(`../logger`).getLogger();
 const STATIC_DIR = path.join(__dirname, `public`);
 
+const apiArticles = require(`./routes/api/articles`);
+const apiCategories = require(`./routes/api/categories`);
+const apiSearch = require(`./routes/api/search`);
+const apiComments = require(`./routes/api/comments`);
+
+const dataServiceArticle = require(`../service/data-service/article`);
+const dataServiceCategory = require(`../service/data-service/category`);
+const dataServiceSearch = require(`../service/data-service/search`);
+const dataServiceComment = require(`../service/data-service/comment`);
+
 app.set(`view engine`, `pug`);
 app.set(`views`, path.join(__dirname, `templates`));
 
@@ -24,13 +34,14 @@ app.use((req, res, next) => {
   next();
 });
 
+apiArticles(app, dataServiceArticle);
+apiCategories(app, dataServiceCategory);
+apiSearch(app, dataServiceSearch);
+apiComments(app, dataServiceComment);
+
 app.use(appRoutes);
 
 app.use(`/articles`, require(`./routes/articles`));
 app.use(`/posts`, require(`./routes/posts`));
-
-app.use(`/api/articles`, require(`./routes/api/articles`));
-app.use(`/api/categories`, require(`./routes/api/categories`));
-app.use(`/api/search`, require(`./routes/api/search`));
 
 module.exports = app;

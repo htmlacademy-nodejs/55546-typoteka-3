@@ -9,9 +9,9 @@ block content
           li.publication__list-item
             .publication__header
               img.publication__list-image(src='/img/avatar-small-2.png', width='20', height='20', alt='Аватар пользователя')
-              b.publication__list-name Александр Петров
-              time.publication__item-time(datetime='2019-03-21T20:33') 21.03.2019, 20:33
-            a.publication__item-text(href='#') Главреды «Дождя», Forbes и других СМИ попросили Роскомнадзор разъяснить штрафы за ссылки на сайты.
-            p.publication__text-strong= comment.text
+              b.publication__list-name= comment.author.name
+              time.publication__item-time(datetime='2019-03-21T20:33')= comment.date_create
+            a.publication__item-text(href='#')= comment.text
+            p.publication__text-strong= comment.article.title
             button.publication__button.button.button--close-item(type='button')
               span.visually-hidden Закрыть строку списка

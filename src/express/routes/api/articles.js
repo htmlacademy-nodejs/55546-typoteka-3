@@ -1,134 +1,101 @@
 'use strict';
 
-const fs = require(`fs`).promises;
+// const fs = require(`fs`).promises;
 const router = require(`express`).Router;
 const route = router();
 
 const logger = require(`../../../logger`).getLogger();
 
-const getArticles = async () => JSON.parse((await fs.readFile(`mock.json`)).toString());
+const validateExistValue = (data, fields) =>
+  fields.reduce((list, key) => [...list, ...(!data[key] ? [`Пустое поле: ${key} `] : [])], []);
 
-// GET / api / articles — ресурс возвращает список публикаций;
-route.get(`/`, async (req, res) => {
-  res.json(await getArticles());
-  logger.info(`Status code ${res.statusCode}`);
-});
+// const getArticles = async () => JSON.parse((await fs.readFile(`mock.json`)).toString());
 
-// GET / api / articles /: articleId — возвращает полную информацию о публикации;
-route.get(`/:articleId`, async (req, res) => {
-  const article = (await getArticles()).find((it) => it.id === req.params.articleId);
-  if (!article) {
-    res.sendStatus(400);
-    logger.error(`Публикация с указанным ID не найдена`);
-  }
+module.exports = async (app, ClassService) => {
+  logger.info(`Подключение articles api`);
 
-  res.json(article);
-  logger.info(`Status code ${res.statusCode}`);
-});
+  const service = new ClassService();
 
-// POST / api / articles — создаёт новую публикацию;
-route.post(`/`, async (req, res) => {
-  const keys = [
-    `title`,
-    `announce`,
-    `fullText`,
-    `createdDate`,
-  ];
+  app.use(`/api/articles`, route);
 
-  for (const key of keys) {
-    if (!req.body[key]) {
-      res.sendStatus(400);
-      logger.error(`Не хватает ${key} данных для создания новой публикации`);
+  // GET / api / articles — ресурс возвращает список публикаций;
+  route.get(`/`, async (req, res) => {
+    res.json(await service.findAll());
+  });
+
+  route.get(`/popular`, async (req, res) => {
+    res.json(await service.findPopular());
+  });
+
+  // GET / api / articles /: articleId — возвращает полную информацию о публикации;
+  route.get(`/:articleId`, async (req, res) => {
+    const { articleId } = req.params;
+    let article = {};
+    try {
+      article = await service.findOne(articleId);
+    } catch (err) {
+      res.sendStatus(404);
+      logger.error(`Ошибка при получении статьи: ${articleId}`);
+    }
+
+    res.json(article);
+  });
+
+  // GET / api / articles / user /: userId — возвращает список публикаций созданных указанным пользователем
+  route.get(`/user/:userId`, async (req, res) => {
+    res.json(await service.findAllByUser(req.params.userId));
+  });
+
+  // POST / api / articles — создаёт новую публикацию;
+  route.post(`/`, async (req, res) => {
+    const data = req.body;
+    const errors = validateExistValue(data, [`title`, `announce`, `full_text`]);
+    if (errors.length > 0) {
+      logger.info(`Не удалось создать новую публикацию:\n ${errors}`);
+      res.json({ response: `Не удалось создать новую публикацию:\n ${errors}` });
       return;
     }
-  }
 
-  res.json({response: `New article!`, data: req.body});
-  logger.info(`Status code ${res.statusCode}`);
-});
-
-// PUT / api / articles /: articleId — редактирует определённую публикацию;
-route.put(`/:articleId`, async (req, res) => {
-  const article = (await getArticles()).find((it) => it.id === req.params.articleId);
-  if (!article) {
-    res.sendStatus(400);
-    logger.error(`Публикация с указанным ID не найдена`);
-    return;
-  }
-
-  res.json({response: `Edit article by id: ${article.id}!`});
-  logger.info(`Status code ${res.statusCode}`);
-});
-
-// DELETE / api / articles /: articleId — удаляет определённое публикацию;
-route.delete(`/:articleId`, async (req, res) => {
-  const article = (await getArticles()).find((it) => it.id === req.params.articleId);
-  if (!article) {
-    res.sendStatus(400);
-    logger.error(`Публикация с указанным ID не найдена`);
-    return;
-  }
-
-  res.json({response: `Delete offer by id: ${article.id}!`});
-  logger.info(`Status code ${res.statusCode}`);
-});
-
-// GET / api / articles /: articleId / comments — возвращает список комментариев определённой публикации;
-route.get(`/:articleId/comments`, async (req, res) => {
-  const article = (await getArticles()).find((it) => it.id === req.params.articleId);
-  if (!article) {
-    res.sendStatus(400);
-    logger.error(`Публикация с указанным ID не найдена`);
-    return;
-  }
-
-  res.json(article.comments);
-  logger.info(`Status code ${res.statusCode}`);
-});
-
-// DELETE / api / articles /: articleId / comments /: commentId — удаляет из определённой публикации комментарий с идентификатором;
-route.delete(`/:articleId/comments/:commentId`, async (req, res) => {
-  const {articleId, commentId} = req.params;
-
-  const article = (await getArticles()).find((it) => it.id === articleId);
-  if (!article) {
-    res.sendStatus(400);
-    logger.error(`Публикация с указанным ID не найдена`);
-    return;
-  }
-
-  const comment = article.comments.find((it) => it.id === commentId);
-  if (!comment) {
-    res.sendStatus(400);
-    logger.error(`Комментарий с указанным ID не найден`);
-    return;
-  }
-
-  res.json({
-    response: `Delete comment by id ${comment.id}!`
+    try {
+      const article = await service.create(data);
+      res.json(article.dataValues);
+      logger.info(`Создана новая публикация`);
+    } catch (err) {
+      res.status(400).json({ err });
+    }
   });
-  logger.info(`Status code ${res.statusCode}`);
-});
 
-// PUT / api / articles /: articleId / comments — создаёт новый комментарий;
-route.put(`/:articleId/comments`, async (req, res) => {
-  const {id, text} = req.body;
+  // PUT / api / articles /: articleId — редактирует определённую публикацию;
+  route.put(`/:articleId`, async (req, res) => {
+    const { articleId } = req.params;
+    const data = req.body;
+    const errors = validateExistValue(data, [`title`, `announce`, `full_text`]);
+    if (errors.length > 0) {
+      logger.info(`Не удалось обновить публикацию:\n ${errors}`);
+      res.json({ response: `Не удалось обновить публикацию:\n ${errors}` });
+      return;
+    }
 
-  const article = (await getArticles()).find((it) => it.id === req.params.articleId);
-  if (!article) {
-    res.sendStatus(400);
-    logger.error(`Публикация с указанным ID не найдена`);
-    return;
-  }
+    try {
+      const article = await service.update(articleId, data);
+      res.json(article.dataValues);
+      logger.info(`Редактирование публикации завершено`);
+    } catch (err) {
+      res.status(400).json(`Ошибка при редактирование публикации: ${err}`);
+      logger.error(`Ошибка при редактирование публикации: ${err}`);
+    }
+  });
 
-  if (!id || !text) {
-    res.sendStatus(400);
-    logger.error(`Не хватает данных для создания комментария`);
-    return;
-  }
-
-  res.json({response: `Create comment!`, data: req.body});
-  logger.info(`Status code ${res.statusCode}`);
-});
-
-module.exports = route;
+  // DELETE / api / articles /: articleId — удаляет публикацию;
+  route.delete(`/:articleId`, async (req, res) => {
+    const { articleId } = req.params;
+    try {
+      await service.delete(articleId);
+      res.json({ response: `Публикация ${articleId} удалена.` });
+      logger.info(`Публикация ${articleId} удалена.`);
+    } catch (err) {
+      res.json({ response: `Ошибка при удалении публикации: ${err}` });
+      logger.info(`Ошибка при удалении публикации: ${err}`);
+    }
+  });
+};
