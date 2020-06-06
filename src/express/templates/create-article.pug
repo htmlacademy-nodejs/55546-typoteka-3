@@ -28,6 +28,11 @@ block content
                     label
                       input.visually-hidden(type='file', name='img')
                       | Обзор
+                each category in categories
+                  .new-publication__checkbox.new-publication__checkbox--auto
+                    input(type=`checkbox` name=`categories[]` id=`category-${category.id}` value= category.id
+                    checked=(article.categories || []).some((it) => +it.id === +category.id))
+                    label(for=`category-${category.id}`)= category.title
                 a.new-publication__form-link.button.button--transparent(href='#') Добавить категорию
               .form__wrapper.form__wrapper--text
                 .form__field.form__field--publication-text

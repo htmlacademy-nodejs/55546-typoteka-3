@@ -10,7 +10,7 @@ block content
       ul.themes
         each category in categories
           li.themes__item
-            a.themes__item-link(href='#')= category.title
+            a.themes__item-link(href=`/category/${category.id}`)= category.title
               sup= category.articlesCount
     .main-page__section-flex
       section.main-page__hot.hot
@@ -20,7 +20,7 @@ block content
         ul.hot__list
           each article in pupularArticles
             li.hot__list-item
-              a.hot__list-link(href='#')= article.title
+              a.hot__list-link(href=`/articles/${article.id}`)= article.title
                 sup.hot__link-sup= article.commentsCount
       section.main-page__last.last
         h2.last__name
@@ -31,7 +31,7 @@ block content
             li.last__list-item
               img.last__list-image(src='/img/avatar-small-1.png', width='20', height='20', alt='Аватар пользователя')
               b.last__list-name= comment.author.name
-              a.last__list-link(href='#')= comment.text
+              a.last__list-link(href=`/articles/${comment.article.id}`)= comment.text
     section.main-page__list.preview
       h2.visually-hidden Список превью статей
       ul.preview__list
@@ -40,13 +40,25 @@ block content
             ul.preview__breadcrumbs
               each category in article.categories
                 li.preview__breadcrumbs-item
-                  a.preview__breadcrumbs-link(href='#')= category.title
+                  a.preview__breadcrumbs-link(href=`category/${category.id}`)= category.title
             time.preview__time(datetime=article.date_create)= article.date_create
             h3.preview__name
-              a.preview__name-link(href='#')= article.title
+              a.preview__name-link(href=`/articles/${article.id}`)= article.title
             p.preview__text= article.full_text
-            a.preview__comment(href='#')
+            a.preview__comment(href=`/articles/${article.id}`)
               | Комментарии
               span.preview__cloud
               |
               b.preview__comment-count= (article.comments || []).length
+      if pagination.isActive
+        .preview__toggle-wrapper
+          ul.preview__pagination.pagination
+            li
+              a(href=`/?page=${pagination.prev.page}`, aria-label="Страница назад",
+                class=`pagination__button button button--backwards ${pagination.prev.status ? `` : `button--disabled`}`) Назад
+            each item in pagination.pages
+              li(class=`pagination__item ${item.isActive ? `pagination__item--active` : ``}`)
+                a(href=`/?page=${item.page}`)= item.page
+            li
+              a(href=`/?page=${pagination.next.page}`, aria-label="Страница вперёд",
+                class=`pagination__button button button--forward ${pagination.next.status ? `` : `button--disabled`}`) Вперед

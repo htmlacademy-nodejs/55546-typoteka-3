@@ -8,15 +8,14 @@ block content
         h2.visually-hidden Основное содержание
         .post__wrapper
           .post__head
-            a.post__backwards.button.button--backwards(href='#') Назад
+            a.post__backwards.button.button--backwards(href='/') Назад
             time.post__date(datetime=article.date_create)=article.date_create
             h2.post__title.title.title--main= article.title
             ul.post__themes.themes
               each category in article.categories
                 li.themes__item
-                  a.themes__item-link(href='#')= category.title
-                    sup 88
-                  button.themes__remove-btn(type='button') Удалить категорию
+                  a.themes__item-link(href=`/category/${category.id}`)= category.title
+                    sup= category.articlesCount
           .post__picture
             img(src='img/sea-fullsize@1x.jpg')
           .post__text

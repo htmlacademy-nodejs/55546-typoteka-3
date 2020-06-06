@@ -21,7 +21,7 @@ class CommentService {
   async findLast() {
     const {Comment} = (await sequelize()).models;
     return (await Comment.findAll({
-      include: [`author`],
+      include: [`author`, `article`],
       limit: LAST_LIMIT,
       order: [[literal(`"date_create"`), `DESC`]]
     })).map((comment) => comment.toJSON());

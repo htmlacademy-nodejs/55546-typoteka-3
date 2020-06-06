@@ -42,6 +42,5 @@ apiComments(app, dataServiceComment);
 app.use(appRoutes);
 
 app.use(`/articles`, require(`./routes/articles`));
-app.use(`/posts`, require(`./routes/posts`));
 
 module.exports = app;

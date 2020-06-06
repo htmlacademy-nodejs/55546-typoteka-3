@@ -24,9 +24,22 @@ const getArticleData = async () => ({
   comments: await getDataByFile(`data/comments.txt`),
 });
 
+const pagination = (total, limit, activePage) => {
+  const countPage = Math.ceil(total / limit);
+
+  return {
+    isActive: countPage > 1,
+    next: {status: activePage >= 1 && activePage < countPage, page: +activePage + 1},
+    prev: {status: activePage > 1 && activePage <= countPage, page: +activePage - 1},
+    pages: Array.from({length: countPage})
+      .map((_it, idx) => ({page: idx + 1, isActive: +activePage === (idx + 1)}))
+  };
+};
+
 module.exports = {
   getArticleData,
   getRandomInt,
   shuffle,
   getUrlRequest,
+  pagination,
 };
