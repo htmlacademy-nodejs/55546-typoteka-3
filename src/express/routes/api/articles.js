@@ -4,9 +4,10 @@ const router = require(`express`).Router;
 const route = router();
 
 const logger = require(`../../../logger`).getLogger();
+const validatorMiddleware = require(`../../middleware/validator-post`);
+const pararmValidator = require(`../../middleware/validator-params`);
 
-const validateExistValue = (data, fields) =>
-  fields.reduce((list, key) => [...list, ...(!data[key] ? [`Пустое поле: ${key} `] : [])], []);
+const articleSchemaValidator = require(`../../validators/article`);
 
 module.exports = async (app, ClassService) => {
   logger.info(`Подключение articles api`);
@@ -26,7 +27,7 @@ module.exports = async (app, ClassService) => {
   });
 
   // GET / api / articles /: articleId — возвращает полную информацию о публикации;
-  route.get(`/:articleId`, async (req, res) => {
+  route.get(`/:articleId`, pararmValidator(`articleId`, `number`), async (req, res) => {
     const {articleId} = req.params;
     let article = {};
     try {
@@ -39,14 +40,17 @@ module.exports = async (app, ClassService) => {
     res.json(article);
   });
 
-  route.get(`/page/:page`, async (req, res) => {
+  route.get(`/page/:page`, pararmValidator(`page`, `number`), async (req, res) => {
     res.json({
       articles: (await service.findAllByPage(req.params.page)),
       count: (await service.getCount())
     });
   });
 
-  route.get(`/category/:categoryId/:page`, async (req, res) => {
+  route.get(`/category/:categoryId/:page`, [
+    pararmValidator(`categoryId`, `number`),
+    pararmValidator(`page`, `number`)
+  ], async (req, res) => {
     const {categoryId, page} = req.params;
     res.json({
       articles: (await service.findAllByCategory(categoryId, page)),
@@ -55,23 +59,15 @@ module.exports = async (app, ClassService) => {
   });
 
   // GET / api / articles / user /: userId — возвращает список публикаций созданных указанным пользователем
-  route.get(`/user/:userId`, async (req, res) => {
+  route.get(`/user/:userId`, pararmValidator(`userId`, `number`), async (req, res) => {
     res.json(await service.findAllByUser(req.params.userId));
   });
 
   // POST / api / articles — создаёт новую публикацию;
-  route.post(`/`, async (req, res) => {
-    const data = req.body;
-    const errors = validateExistValue(data, [`title`, `announce`, `full_text`]);
-    if (errors.length > 0) {
-      logger.info(`Не удалось создать новую публикацию:\n ${errors}`);
-      res.json({response: `Не удалось создать новую публикацию:\n ${errors}`});
-      return;
-    }
-
+  route.post(`/`, validatorMiddleware(articleSchemaValidator), async (req, res) => {
     try {
-      const article = await service.create(data);
-      res.json(article.dataValues);
+      const article = await service.create(req.body);
+      res.status(200).json(article.dataValues);
       logger.info(`Создана новая публикация`);
     } catch (err) {
       res.status(400).json({err});
@@ -80,19 +76,13 @@ module.exports = async (app, ClassService) => {
   });
 
   // PUT / api / articles /: articleId — редактирует определённую публикацию;
-  route.put(`/:articleId`, async (req, res) => {
-    const {articleId} = req.params;
-    const data = req.body;
-    const errors = validateExistValue(data, [`title`, `announce`, `full_text`]);
-    if (errors.length > 0) {
-      logger.info(`Не удалось обновить публикацию:\n ${errors}`);
-      res.json({response: `Не удалось обновить публикацию:\n ${errors}`});
-      return;
-    }
-
+  route.put(`/:articleId`, [
+    pararmValidator(`articleId`, `number`),
+    validatorMiddleware(articleSchemaValidator)
+  ], async (req, res) => {
     try {
-      const article = await service.update(articleId, data);
-      res.json(article.dataValues);
+      const article = await service.update(req.params.articleId, req.body.data);
+      res.status(200).json(article.dataValues);
       logger.info(`Редактирование публикации завершено`);
     } catch (err) {
       res.status(400).json(`Ошибка при редактирование публикации: ${err}`);
@@ -101,7 +91,7 @@ module.exports = async (app, ClassService) => {
   });
 
   // DELETE / api / articles /: articleId — удаляет публикацию;
-  route.delete(`/:articleId`, async (req, res) => {
+  route.delete(`/:articleId`, pararmValidator(`articleId`, `number`), async (req, res) => {
     const {articleId} = req.params;
     try {
       await service.delete(articleId);

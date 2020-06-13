@@ -12,7 +12,7 @@ module.exports = async (app, ClassService) => {
   app.use(`/api/search`, route);
 
   route.get(`/`, async (req, res) => {
-    const { query } = req.query;
+    const {query} = req.query;
     logger.info(`Получение списка статей по заголовку ${query}`);
     res.status(200).json(await service.search(query));
   });

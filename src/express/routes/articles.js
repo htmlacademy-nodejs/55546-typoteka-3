@@ -20,7 +20,9 @@ const multerStorage = multer.diskStorage({
 
 const {PAGINATION_LIMIT} = require(`../../const`);
 
-route.get(`/category/:categoryId`, async (req, res) => {
+const paramValidator = require(`../middleware/validator-params`);
+
+route.get(`/category/:categoryId`, paramValidator(`categoryId`, `number`), async (req, res) => {
   const {categoryId} = req.params;
   let currentCategory = null;
   try {
@@ -65,7 +67,7 @@ route.get(`/add`, async (req, res) => {
   res.render(`create-article`, {categories, article: {}});
 });
 
-route.get(`/:id`, async (req, res) => {
+route.get(`/:id`, paramValidator(`id`, `number`), async (req, res) => {
   let article = {};
   try {
     article = (await axios.get(getUrlRequest(req, `/api/articles/${req.params.id}`))).data;
@@ -92,11 +94,11 @@ route.post(`/add`, multer({storage: multerStorage}).single(`img`), async (req, r
 
   try {
     const article = await axios.post(getUrlRequest(req, `/api/articles`), JSON.stringify({
-      'author_id': 1,
       'title': body[`title`],
       'img': body[`img`],
       'announce': body[`announce`],
       'full_text': body[`full_text`],
+      'author_id': 1,
     }), {headers: {'Content-Type': `application/json`}});
 
     await axios.post(getUrlRequest(req, `/api/categories/set-article-categories`),
@@ -106,13 +108,16 @@ route.post(`/add`, multer({storage: multerStorage}).single(`img`), async (req, r
     logger.info(`Создано новое предложение ${article.data.id}`);
     res.redirect(`/my`);
   } catch (err) {
+    if (err.response && err.response.data) {
+      logger.error(`Ошибка валидации: ${err.response.data.message}`);
+    }
     logger.error(`Ошибка при создании новой статьи: ${err}`);
   }
 
   res.render(`create-article`, {categories, article: body});
 });
 
-route.get(`/edit/:id`, async (req, res) => {
+route.get(`/edit/:id`, paramValidator(`id`, `number`), async (req, res) => {
   let article = {};
   try {
     article = (await axios.get(getUrlRequest(req, `/api/articles/${req.params.id}`))).data;
@@ -131,7 +136,10 @@ route.get(`/edit/:id`, async (req, res) => {
   res.render(`edit-article`, {article, categories});
 });
 
-route.post(`/edit/:id`, multer({storage: multerStorage}).single(`img`), async (req, res) => {
+route.post(`/edit/:id`, [
+  paramValidator(`id`, `number`),
+  multer({storage: multerStorage}).single(`img`)
+], async (req, res) => {
   const {file, body, params} = req;
   if (file) {
     body.img = file.filename;
@@ -156,6 +164,9 @@ route.post(`/edit/:id`, multer({storage: multerStorage}).single(`img`), async (r
     logger.info(`Публикация была успешно отредактирована`);
     res.redirect(`/my`);
   } catch (err) {
+    if (err.response && err.response.data) {
+      logger.error(`Ошибка валидации: ${err.response.data.message}`);
+    }
     logger.error(`Ошибка при редактировании публикации (${params.id}): ${err}`);
   }
 

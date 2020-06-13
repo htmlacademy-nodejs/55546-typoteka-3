@@ -15,7 +15,13 @@ class CommentService {
   async findAll() {
     const {Comment} = (await sequelize()).models;
     return (await Comment.findAll({include: [`categories`]}))
-      .map((category) => category.toJSON());
+      .map((comment) => comment.toJSON());
+  }
+
+  async findAllByArticleId(id) {
+    const {Comment} = (await sequelize()).models;
+    return (await Comment.findAll({where: {'article_id': +id}}))
+      .map((comment) => comment.toJSON());
   }
 
   async findLast() {
