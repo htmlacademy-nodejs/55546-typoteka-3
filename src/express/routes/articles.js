@@ -80,6 +80,7 @@ route.get(`/:id`, paramValidator(`id`, `number`), async (req, res) => {
 
 route.post(`/add`, multer({storage: multerStorage}).single(`img`), async (req, res) => {
   const {body, file} = req;
+  let errors = null;
 
   if (file) {
     body.img = file.filename;
@@ -109,12 +110,13 @@ route.post(`/add`, multer({storage: multerStorage}).single(`img`), async (req, r
     res.redirect(`/my`);
   } catch (err) {
     if (err.response && err.response.data) {
-      logger.error(`Ошибка валидации: ${err.response.data.message}`);
+      errors = err.response.data.message;
+      logger.error(`Ошибка валидации: ${errors}`);
     }
     logger.error(`Ошибка при создании новой статьи: ${err}`);
   }
 
-  res.render(`create-article`, {categories, article: body});
+  res.render(`create-article`, {categories, article: body, errors});
 });
 
 route.get(`/edit/:id`, paramValidator(`id`, `number`), async (req, res) => {
@@ -141,6 +143,15 @@ route.post(`/edit/:id`, [
   multer({storage: multerStorage}).single(`img`)
 ], async (req, res) => {
   const {file, body, params} = req;
+  let errors = null;
+
+  let article = {};
+  try {
+    article = (await axios.get(getUrlRequest(req, `/api/articles/${params.id}`))).data;
+  } catch (err) {
+    logger.error(`Ошибка при получении публикации`);
+  }
+
   if (file) {
     body.img = file.filename;
   }
@@ -154,6 +165,7 @@ route.post(`/edit/:id`, [
 
   try {
     body[`date_create`] = +(new Date(body[`date_create`].split(`.`).reverse().join(`-`)));
+    body[`author_id`] = article[`author_id`];
     await axios.put(getUrlRequest(req, `/api/articles/${params.id}`), JSON.stringify(body),
         {headers: {'Content-Type': `application/json`}});
 
@@ -165,18 +177,13 @@ route.post(`/edit/:id`, [
     res.redirect(`/my`);
   } catch (err) {
     if (err.response && err.response.data) {
-      logger.error(`Ошибка валидации: ${err.response.data.message}`);
+      errors = err.response.data.message;
+      logger.error(`Ошибка валидации: ${errors}`);
     }
     logger.error(`Ошибка при редактировании публикации (${params.id}): ${err}`);
   }
 
-  let article = {};
-  try {
-    article = (await axios.get(getUrlRequest(req, `/api/articles/${params.id}`))).data;
-  } catch (err) {
-    logger.error(`Ошибка при получении публикации`);
-  }
-  res.render(`edit-article`, {article, categories});
+  res.render(`edit-article`, {article, categories, errors});
 });
 
 module.exports = route;

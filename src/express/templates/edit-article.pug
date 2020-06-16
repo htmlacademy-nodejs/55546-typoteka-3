@@ -6,6 +6,12 @@ block content
       .popup.popup--new-publication.popup--flex
         .new-publication
           form(action=`/articles/edit/${article.id}`, method='post', enctype='multipart/form-data', autocomplete='off')
+            if errors
+              .form__validation-error
+                p.form__error-message При редактировании статьи произошли ошибки:
+                ul
+                  each error in errors
+                    li.form__error= error
             .new-publication__header
               h1 Новая публикация
               .new-publication__date-form

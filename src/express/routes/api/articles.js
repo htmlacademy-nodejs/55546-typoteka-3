@@ -81,7 +81,7 @@ module.exports = async (app, ClassService) => {
     validatorMiddleware(articleSchemaValidator)
   ], async (req, res) => {
     try {
-      const article = await service.update(req.params.articleId, req.body.data);
+      const article = await service.update(req.params.articleId, req.body);
       res.status(200).json(article.dataValues);
       logger.info(`Редактирование публикации завершено`);
     } catch (err) {
