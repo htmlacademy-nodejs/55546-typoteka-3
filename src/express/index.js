@@ -12,11 +12,16 @@ const apiArticles = require(`./routes/api/articles`);
 const apiCategories = require(`./routes/api/categories`);
 const apiSearch = require(`./routes/api/search`);
 const apiComments = require(`./routes/api/comments`);
+const apiUser = require(`./routes/api/user`);
 
 const dataServiceArticle = require(`../service/data-service/article`);
 const dataServiceCategory = require(`../service/data-service/category`);
 const dataServiceSearch = require(`../service/data-service/search`);
 const dataServiceComment = require(`../service/data-service/comment`);
+const dataServiceUser = require(`../service/data-service/user`);
+
+const articlesRoute = require(`./routes/articles`);
+const userRoute = require(`./routes/user`);
 
 app.set(`view engine`, `pug`);
 app.set(`views`, path.join(__dirname, `templates`));
@@ -38,9 +43,11 @@ apiArticles(app, dataServiceArticle);
 apiCategories(app, dataServiceCategory);
 apiSearch(app, dataServiceSearch);
 apiComments(app, dataServiceComment);
+apiUser(app, dataServiceUser);
 
 app.use(appRoutes);
 
-app.use(`/articles`, require(`./routes/articles`));
+app.use(`/articles`, articlesRoute);
+app.use(`/user`, userRoute);
 
 module.exports = app;
