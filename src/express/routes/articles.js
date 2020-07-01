@@ -19,6 +19,7 @@ const multerStorage = multer.diskStorage({
 });
 
 const {PAGINATION_LIMIT} = require(`../../const`);
+const authenticate = require(`../middleware/authenticate`);
 
 const paramValidator = require(`../middleware/validator-params`);
 
@@ -54,7 +55,7 @@ route.get(`/category/:categoryId`, paramValidator(`categoryId`, `number`), async
   });
 });
 
-route.get(`/add`, async (req, res) => {
+route.get(`/add`, authenticate, async (req, res) => {
   logger.info(`Создание новой статьи`);
 
   let categories = [];
@@ -78,7 +79,7 @@ route.get(`/:id`, paramValidator(`id`, `number`), async (req, res) => {
   res.render(`article`, {article});
 });
 
-route.post(`/add`, multer({storage: multerStorage}).single(`img`), async (req, res) => {
+route.post(`/add`, authenticate, multer({storage: multerStorage}).single(`img`), async (req, res) => {
   const {body, file} = req;
   let errors = null;
 
@@ -119,7 +120,7 @@ route.post(`/add`, multer({storage: multerStorage}).single(`img`), async (req, r
   res.render(`create-article`, {categories, article: body, errors});
 });
 
-route.get(`/edit/:id`, paramValidator(`id`, `number`), async (req, res) => {
+route.get(`/edit/:id`, [authenticate, paramValidator(`id`, `number`)], async (req, res) => {
   let article = {};
   try {
     article = (await axios.get(getUrlRequest(req, `/api/articles/${req.params.id}`))).data;
@@ -139,6 +140,7 @@ route.get(`/edit/:id`, paramValidator(`id`, `number`), async (req, res) => {
 });
 
 route.post(`/edit/:id`, [
+  authenticate,
   paramValidator(`id`, `number`),
   multer({storage: multerStorage}).single(`img`)
 ], async (req, res) => {

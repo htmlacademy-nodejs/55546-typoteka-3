@@ -14,6 +14,8 @@ const apiSearch = require(`./routes/api/search`);
 const apiComments = require(`./routes/api/comments`);
 const apiUser = require(`./routes/api/user`);
 
+const expressSession = require(`express-session`);
+
 const dataServiceArticle = require(`../service/data-service/article`);
 const dataServiceCategory = require(`../service/data-service/category`);
 const dataServiceSearch = require(`../service/data-service/search`);
@@ -23,11 +25,22 @@ const dataServiceUser = require(`../service/data-service/user`);
 const articlesRoute = require(`./routes/articles`);
 const userRoute = require(`./routes/user`);
 
+const getUser = require(`./middleware/get-user`);
+
 app.set(`view engine`, `pug`);
 app.set(`views`, path.join(__dirname, `templates`));
 
 app.use(express.static(STATIC_DIR));
 app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+
+app.use(expressSession({
+  secret: `SECRET_SESSION`,
+  resave: false,
+  saveUninitialized: false,
+  name: `session_id`
+}));
+app.use(getUser);
 
 app.use((_req, res, next) => {
   res.db = app.get(`db`);

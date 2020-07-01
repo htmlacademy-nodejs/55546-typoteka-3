@@ -6,6 +6,7 @@ const router = require(`express`).Router;
 const route = router();
 const {getUrlRequest} = require(`../../utils`);
 const logger = require(`../../logger`).getLogger();
+const csrf = require(`csurf`);
 
 const multer = require(`multer`);
 const multerStorage = multer.diskStorage({
@@ -17,11 +18,17 @@ const multerStorage = multer.diskStorage({
   }
 });
 
-route.get(`/register`, (req, res) => {
-  res.render(`registration`, {errors: null, data: {}});
+const csrfProtection = csrf();
+
+route.get(`/register`, csrfProtection, (req, res) => {
+  res.render(`registration`, {
+    errors: null,
+    data: {},
+    csrf: req.csrfToken()
+  });
 });
 
-route.post(`/register`, multer({storage: multerStorage}).single(`avatar`), async (req, res) => {
+route.post(`/register`, [csrfProtection, multer({storage: multerStorage}).single(`avatar`)], async (req, res) => {
   const {file, body} = req;
   let errors = null;
 
@@ -42,17 +49,54 @@ route.post(`/register`, multer({storage: multerStorage}).single(`avatar`), async
     logger.error(`Ошибка при регистрации: ${err}`);
   }
 
-  res.render(`registration`, {form: null, errors, data: body});
+  res.render(`registration`, {
+    form: null,
+    errors,
+    data: body,
+    csrf: req.csrfToken()
+  });
 });
 
-route.get(`/login`, (req, res) => {
-  let errors = null;
-  res.render(`registration`, {form: `login`, errors, data: {}});
+route.get(`/login`, csrfProtection, (req, res) => {
+
+  res.render(`registration`, {
+    form: `login`,
+    errors: null,
+    data: {},
+    csrf: req.csrfToken()
+  });
 });
 
-route.post(`/login`, (req, res) => {
+route.post(`/login`, csrfProtection, async (req, res) => {
+  const {body} = req;
   let errors = null;
-  res.render(`registration`, {form: `login`, errors, data: {}});
+  try {
+    const user = await axios.post(getUrlRequest(req, `/api/user/login`), JSON.stringify(body),
+        {headers: {'Content-Type': `application/json`}});
+
+    req.session[`user_id`] = user.data.id;
+
+    logger.info(`Авторизация прошла успешно`);
+    res.redirect(`/`);
+  } catch (err) {
+    if (err.response && err.response.data) {
+      errors = err.response.data.message;
+      logger.error(`Ошибка валидации: ${errors}`);
+    }
+    logger.error(`Ошибка при авторизации: ${err}`);
+  }
+
+  res.render(`registration`, {
+    form: `login`,
+    errors,
+    data: body,
+    csrf: req.csrfToken()
+  });
+});
+
+route.get(`/logout`, (req, res) => {
+  delete req.session[`user_id`];
+  res.redirect(`/user/login`);
 });
 
 module.exports = route;

@@ -41,15 +41,23 @@ block content
               label
                 input.visually-hidden(type='file', name='avatar')
                 | Загрузить фото профиля
+            input(type='hidden' name='_csrf' value= csrf)
             button.form__submit-btn.form__submit-btn--register.button.button--colored(type='submit') Зарегистрироваться
         .popup__form.form.form--log-in(class= `${form !== `login` ? `popup__form--hidden` : ``}`)
           form(action='/user/login', method='post')
             .form__field
               label
-                input(type='email', placeholder='Электронная почта', required)
+                input(type='email', name='email', placeholder='Электронная почта', required, value= data.email ? data.email : ``)
             .form__field
               label
-                input(type='password', placeholder='Пароль', required)
+                input(type='password', name='password', placeholder='Пароль', required)
+            if errors
+              .form__validation-error
+                p.form__error-message При авторизации произошли ошибки:
+                ul
+                  each error in errors
+                    li.form__error= error
+            input(type='hidden' name='_csrf' value= csrf)
             button.form__submit-btn.form__submit-btn--log-in.button.button--colored(type='submit') Войти
       .modal__overlay
 block scripts

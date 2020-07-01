@@ -7,7 +7,10 @@ const route = router();
 const {PASSWORD_SALT} = require(`../../../const`);
 
 const validatorMiddleware = require(`../../middleware/validator-post`);
-const registerSchemaValidator = require(`../../validators/user`).register;
+const {
+  register: registerSchemaValidator,
+  login: loginSchemaValidator,
+} = require(`../../validators/user`);
 
 module.exports = async (app, ClassService) => {
   logger.info(`Подключение user api`);
@@ -31,5 +34,20 @@ module.exports = async (app, ClassService) => {
     }
 
     res.status(200).json({result: `Создан новый пользователь`});
+  });
+
+  route.get(`/get/:id`, async (req, res) => {
+    res.status(200).json(await service.findOne(req.params.id));
+  });
+
+  route.post(`/login`, validatorMiddleware(loginSchemaValidator), async (req, res) => {
+    const {email, password} = req.body;
+    const {status, message, user} = await service.authorization(email, password);
+    if (!status) {
+      res.status(400).json({message, data: {}});
+      return;
+    }
+
+    res.status(200).json(user);
   });
 };

@@ -9,6 +9,7 @@ const appRouter = router();
 const logger = require(`../../logger`).getLogger();
 
 const {PAGINATION_LIMIT} = require(`../../const`);
+const authenticate = require(`../middleware/authenticate`);
 
 appRouter.get(`/`, async (req, res) => {
   logger.info(`Главная страница`);
@@ -61,7 +62,7 @@ appRouter.get(`/login`, (req, res) => {
   logger.info(`Status code ${res.statusCode}`);
 });
 
-appRouter.get(`/my`, async (req, res) => {
+appRouter.get(`/my`, authenticate, async (req, res) => {
   logger.info(`Персональные публикации`);
   let articles = [];
   try {
@@ -74,7 +75,7 @@ appRouter.get(`/my`, async (req, res) => {
   res.render(`personal-publications`, {articles});
 });
 
-appRouter.get(`/my/comments`, async (req, res) => {
+appRouter.get(`/my/comments`, authenticate, async (req, res) => {
   let comments = [];
   try {
     comments = (await axios.get(getUrlRequest(req, `/api/comments/personal-last`))).data;
