@@ -2,7 +2,6 @@
 
 const Joi = require(`@hapi/joi`);
 
-
 const login = {
   'password': Joi.string().min(3).required(),
   'email': Joi.string().email().required(),

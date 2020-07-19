@@ -40,7 +40,7 @@ route.post(`/register`, [csrfProtection, multer({storage: multerStorage}).single
     await axios.post(getUrlRequest(req, `/api/user/`), JSON.stringify(body),
         {headers: {'Content-Type': `application/json`}});
     logger.info(`Регистрация прошла успешно`);
-    res.redirect(`/user/login`);
+    res.redirect(`/login`);
   } catch (err) {
     if (err.response && err.response.data) {
       errors = err.response.data.message;
@@ -58,7 +58,6 @@ route.post(`/register`, [csrfProtection, multer({storage: multerStorage}).single
 });
 
 route.get(`/login`, csrfProtection, (req, res) => {
-
   res.render(`registration`, {
     form: `login`,
     errors: null,
@@ -96,7 +95,7 @@ route.post(`/login`, csrfProtection, async (req, res) => {
 
 route.get(`/logout`, (req, res) => {
   delete req.session[`user_id`];
-  res.redirect(`/user/login`);
+  res.redirect(`/login`);
 });
 
 module.exports = route;

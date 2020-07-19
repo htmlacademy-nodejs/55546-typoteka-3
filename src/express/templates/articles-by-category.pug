@@ -8,7 +8,8 @@ block content
       ul.themes
         each category in categories
           li.themes__item
-            a.themes__item-link(href=`/articles/category/${category.id}`)= category.title
+            a.themes__item-link(href=`/articles/category/${category.id}`,
+              class= currentCategory.id === category.id ? `themes__item-link--active` : ``)= category.title
               sup= category.articlesCount
     section.articles-category__list.preview
       h2.visually-hidden Список превью статей
@@ -39,7 +40,10 @@ block content
                 class=`pagination__button button button--backwards ${pagination.prev.status ? `` : `button--disabled`}`) Назад
             each item in pagination.pages
               li(class=`pagination__item ${item.isActive ? `pagination__item--active` : ``}`)
-                a(href=`/articles/category/${currentCategory.id}/?page=${item.page}`)= item.page
+                if item.isActive
+                  a= item.page
+                else
+                  a(href=`/articles/category/${currentCategory.id}/?page=${item.page}`)= item.page
             li
               a(href=`/articles/category/${currentCategory.id}?page=${pagination.next.page}`, aria-label="Страница вперёд",
                 class=`pagination__button button button--forward ${pagination.next.status ? `` : `button--disabled`}`) Вперед

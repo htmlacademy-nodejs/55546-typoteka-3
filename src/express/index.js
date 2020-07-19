@@ -42,11 +42,6 @@ app.use(expressSession({
 }));
 app.use(getUser);
 
-app.use((_req, res, next) => {
-  res.db = app.get(`db`);
-  next();
-});
-
 app.use((req, res, next) => {
   logger.debug(`Маршрут запроса: ${req.url}`);
   next();
@@ -60,7 +55,7 @@ apiUser(app, dataServiceUser);
 
 app.use(appRoutes);
 
+app.use(`/`, userRoute);
 app.use(`/articles`, articlesRoute);
-app.use(`/user`, userRoute);
 
 module.exports = app;

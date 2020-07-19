@@ -52,21 +52,11 @@ appRouter.get(`/`, async (req, res) => {
   });
 });
 
-appRouter.get(`/register`, (req, res) => {
-  res.render(`registration`);
-  logger.info(`Status code ${res.statusCode}`);
-});
-
-appRouter.get(`/login`, (req, res) => {
-  res.render(`registration`);
-  logger.info(`Status code ${res.statusCode}`);
-});
-
 appRouter.get(`/my`, authenticate, async (req, res) => {
   logger.info(`Персональные публикации`);
   let articles = [];
   try {
-    articles = (await axios.get(getUrlRequest(req, `/api/articles/user/1`))).data;
+    articles = (await axios.get(getUrlRequest(req, `/api/articles/user/${res.locals.user.id}`))).data;
   } catch (err) {
     logger.error(`Ошибка при получении списка статей пользователя`);
     return;

@@ -1,7 +1,8 @@
 'use strict';
 
-const {literal} = require(`sequelize`);
+const {literal, where} = require(`sequelize`);
 const sequelize = require(`../db/sequelize`);
+const {Op} = require(`sequelize`);
 
 const POPULAR_LIMIT = 4;
 
@@ -82,9 +83,10 @@ class ArticleService {
     return (await Article.findAll({
       attributes: {
         include: [
-          [literal(`(SELECT COUNT(*) FROM comments WHERE comments.article_id = "Article"."id")`), `commentsCount`],
+          [literal(`(SELECT COUNT(article_id) FROM "comments" WHERE "comments"."article_id" = "Article"."id")`), `commentsCount`],
         ]
       },
+      // where: literal(`"commentsCount" > 0`),
       include: [`comments`],
       limit: POPULAR_LIMIT,
       order: [literal(`"commentsCount"`)]

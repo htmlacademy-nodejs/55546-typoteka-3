@@ -4,36 +4,47 @@ block content
   main.main-page
     h1.visually-hidden Главная страница личного блога Типотека
     p.
-      Это приветственный текст, который владелец блога может выбрать, чтобы описать себя 👏
+      Это приветственный текст владельца блога 👏!
     section.main-page__theme-list
       h2.visually-hidden Список тем
       ul.themes
         each category in categories
-          li.themes__item
-            a.themes__item-link(href=`/category/${category.id}`)= category.title
-              sup= category.articlesCount
+          if category.articlesCount > 0
+            li.themes__item
+              a.themes__item-link(href=`/articles/category/${category.id}`)= category.title
+                sup= category.articlesCount
     .main-page__section-flex
       section.main-page__hot.hot
         h2.hot__name
           | Самое обсуждаемое
           span.hot__icon.hot__icon--fire
-        ul.hot__list
-          each article in pupularArticles
-            li.hot__list-item
-              a.hot__list-link(href=`/articles/${article.id}`)= article.title
-                sup.hot__link-sup= article.commentsCount
+        if !pupularArticles || pupularArticles.length === 0
+          p Здесь пока ничего нет
+        else
+          ul.hot__list
+            each article in pupularArticles
+              li.hot__list-item
+                a.hot__list-link(href=`/articles/${article.id}`)= article.title
+                  sup.hot__link-sup= article.commentsCount
       section.main-page__last.last
         h2.last__name
           | Последние комментарии
           span.last__icon.last__icon--cloud
-        ul.last__list
-          each comment in lastComments
-            li.last__list-item
-              img.last__list-image(src='/img/avatar-small-1.png', width='20', height='20', alt='Аватар пользователя')
-              b.last__list-name= comment.author.name
-              a.last__list-link(href=`/articles/${comment.article.id}`)= comment.text
+        if !lastComments || lastComments.length === 0
+          p Здесь пока ничего нет
+        else
+          ul.last__list
+            each comment in lastComments
+              li.last__list-item
+                img.last__list-image(src='/img/avatar-small-1.png', width='20', height='20', alt='Аватар пользователя')
+                b.last__list-name= `${comment.author.name} ${comment.author.surname}`
+                if comment.text
+                  a.last__list-link(href=`/articles/${comment.article.id}`)= comment.text.length > 100 ? `${comment.text.slice(0, 100)}...` : comment.text
     section.main-page__list.preview
       h2.visually-hidden Список превью статей
+      if !articles || articles.length === 0
+        .main-page__empty-wrapper
+          p.main-page__empty-text Здесь пока пусто!
       ul.preview__list
         each article in articles
           li.preview__item.preview__item--noimage
@@ -44,7 +55,7 @@ block content
             time.preview__time(datetime=article.date_create)= article.date_create
             h3.preview__name
               a.preview__name-link(href=`/articles/${article.id}`)= article.title
-            p.preview__text= article.full_text
+            p.preview__text= article.announce
             a.preview__comment(href=`/articles/${article.id}`)
               | Комментарии
               span.preview__cloud
@@ -58,7 +69,10 @@ block content
                 class=`pagination__button button button--backwards ${pagination.prev.status ? `` : `button--disabled`}`) Назад
             each item in pagination.pages
               li(class=`pagination__item ${item.isActive ? `pagination__item--active` : ``}`)
-                a(href=`/?page=${item.page}`)= item.page
+                if item.isActive
+                  a= item.page
+                else
+                  a(href=`/?page=${item.page}`)= item.page
             li
               a(href=`/?page=${pagination.next.page}`, aria-label="Страница вперёд",
                 class=`pagination__button button button--forward ${pagination.next.status ? `` : `button--disabled`}`) Вперед
