@@ -1,8 +1,7 @@
 'use strict';
 
-const {literal, where} = require(`sequelize`);
+const {literal} = require(`sequelize`);
 const sequelize = require(`../db/sequelize`);
-const {Op} = require(`sequelize`);
 
 const POPULAR_LIMIT = 4;
 
@@ -11,7 +10,6 @@ const {PAGINATION_LIMIT} = require(`../../const`);
 class ArticleService {
   async findOne(id) {
     const {Article, Comment, Category} = (await sequelize()).models;
-
     return (await Article.findByPk(id, {
       include: [
         {
@@ -28,7 +26,8 @@ class ArticleService {
             [literal(`(SELECT COUNT(article_id) FROM "articles_category" WHERE "categories"."id" = "articles_category"."category_id")`), `articlesCount`]
           ]
         }
-      ]
+      ],
+      order: [literal(`"comments.date_create" DESC`)]
     })).toJSON();
   }
 
@@ -81,15 +80,18 @@ class ArticleService {
   async findPopular() {
     const {Article} = (await sequelize()).models;
     return (await Article.findAll({
-      attributes: {
-        include: [
-          [literal(`(SELECT COUNT(article_id) FROM "comments" WHERE "comments"."article_id" = "Article"."id")`), `commentsCount`],
-        ]
-      },
-      // where: literal(`"commentsCount" > 0`),
+      attributes: [
+        [literal(`(SELECT COUNT(article_id) FROM "comments" WHERE "comments"."article_id" = "Article"."id")`), `commentsCount`]
+      ],
+      // attributes: {
+      //   include: [
+      //     [literal(`(SELECT COUNT(article_id) FROM "comments" WHERE "comments"."article_id" = "Article"."id")`), `commentsCount`],
+      //   ]
+      // },
+      where: literal(`"commentsCount" > 0`),
       include: [`comments`],
       limit: POPULAR_LIMIT,
-      order: [literal(`"commentsCount"`)]
+      order: [literal(`"commentsCount" DESC`)]
     })).map((article) => article.toJSON());
   }
 

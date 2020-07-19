@@ -18,9 +18,9 @@ const multerStorage = multer.diskStorage({
   }
 });
 
-const csrfProtection = csrf();
+const csrfMiddleware = csrf();
 
-route.get(`/register`, csrfProtection, (req, res) => {
+route.get(`/register`, csrfMiddleware, (req, res) => {
   res.render(`registration`, {
     errors: null,
     data: {},
@@ -28,7 +28,7 @@ route.get(`/register`, csrfProtection, (req, res) => {
   });
 });
 
-route.post(`/register`, [csrfProtection, multer({storage: multerStorage}).single(`avatar`)], async (req, res) => {
+route.post(`/register`, [csrfMiddleware, multer({storage: multerStorage}).single(`avatar`)], async (req, res) => {
   const {file, body} = req;
   let errors = null;
 
@@ -57,7 +57,7 @@ route.post(`/register`, [csrfProtection, multer({storage: multerStorage}).single
   });
 });
 
-route.get(`/login`, csrfProtection, (req, res) => {
+route.get(`/login`, csrfMiddleware, (req, res) => {
   res.render(`registration`, {
     form: `login`,
     errors: null,
@@ -66,7 +66,7 @@ route.get(`/login`, csrfProtection, (req, res) => {
   });
 });
 
-route.post(`/login`, csrfProtection, async (req, res) => {
+route.post(`/login`, csrfMiddleware, async (req, res) => {
   const {body} = req;
   let errors = null;
   try {
@@ -77,6 +77,7 @@ route.post(`/login`, csrfProtection, async (req, res) => {
 
     logger.info(`Авторизация прошла успешно`);
     res.redirect(`/`);
+    return;
   } catch (err) {
     if (err.response && err.response.data) {
       errors = err.response.data.message;

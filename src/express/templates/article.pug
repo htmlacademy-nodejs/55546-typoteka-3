@@ -22,7 +22,7 @@ block content
             h3= article.title
             p= article.announce
             p= article.full_text
-      .post__wrapper.post__wrapper--comments
+      .post__wrapper.post__wrapper--comments#comments
         section.post__comments.comments
           if !article.comments || article.comments.length === 0
             h2.comments__title.title.title--middle Комментарии отсутствуют

@@ -1,6 +1,6 @@
 'use strict';
 
-const {Op} = require(`sequelize`);
+const {Op, literal} = require(`sequelize`);
 const sequelize = require(`../db/sequelize`);
 
 class SearchService {
@@ -10,9 +10,10 @@ class SearchService {
       raw: true,
       where: {
         title: {
-          [Op.like]: `%${title}%`
+          [Op.iLike]: `%${title}%`
         }
-      }
+      },
+      order: [literal(`"date_create" DESC`)]
     });
   }
 }

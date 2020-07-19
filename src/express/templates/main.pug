@@ -24,7 +24,7 @@ block content
           ul.hot__list
             each article in pupularArticles
               li.hot__list-item
-                a.hot__list-link(href=`/articles/${article.id}`)= article.title
+                a.hot__list-link(href=`/articles/${article.id}`)= article.announce.length > 100 ? `${article.announce.slice(0, 100)}...` : article.announce
                   sup.hot__link-sup= article.commentsCount
       section.main-page__last.last
         h2.last__name

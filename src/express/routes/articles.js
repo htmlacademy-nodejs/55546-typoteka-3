@@ -76,6 +76,7 @@ route.get(`/:id`, paramValidator(`id`, `number`), async (req, res) => {
     logger.error(`Ошибка при получении статьи: ${err}`);
   }
 
+
   res.render(`article`, {article});
 });
 
