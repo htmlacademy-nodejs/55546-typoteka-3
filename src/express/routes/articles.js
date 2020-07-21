@@ -110,6 +110,7 @@ route.post(`/add`, authenticate, multer({storage: multerStorage}).single(`img`),
 
     logger.info(`Создано новое предложение ${article.data.id}`);
     res.redirect(`/my`);
+    return;
   } catch (err) {
     if (err.response && err.response.data) {
       errors = err.response.data.message;

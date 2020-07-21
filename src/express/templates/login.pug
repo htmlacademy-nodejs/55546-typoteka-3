@@ -1,0 +1,31 @@
+extends layouts/layout.pug
+
+block content
+  main
+    h1.visually-hidden Регистрация пользователя
+    section.modal
+      .popup.popup--registration
+        button.popup__button.button.button--popup-close(type='button', aria-label='Закрыть окно') Закрыть окно
+        h2.visually-hidden Форма входа
+        ul.popup__tabs
+          li.popup__tab.popup__tab--log-in
+            button.popup__tab-switcher.button(type='button') Войти
+        .popup__form.form.form--log-in
+          form(action='/login', method='post' novalidate)
+            .form__field
+              label
+                input(type='email', name='email', placeholder='Электронная почта', required, value= data.email ? data.email : ``)
+            .form__field
+              label
+                input(type='password', name='password', placeholder='Пароль', required)
+            if errors
+              .form__validation-error
+                p.form__error-message При авторизации произошли ошибки:
+                ul
+                  each error in errors
+                    li.form__error= error
+            input(type='hidden' name='_csrf' value= csrf)
+            button.form__submit-btn.form__submit-btn--log-in.button.button--colored(type='submit') Войти
+      .modal__overlay
+block scripts
+  script(src='/js/main.js')

@@ -14,7 +14,7 @@ block content
             each article in articles
               .search__result
                 time.search__date(datetime=article.date_create)= article.date_create
-                a.search__link= article.title
+                a.search__link(href=`/articles/${article.id}`)= article.title
         if isEmpty
           p.search-page__empty Ничего не нашлось
 

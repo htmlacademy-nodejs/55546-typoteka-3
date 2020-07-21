@@ -73,23 +73,21 @@ class ArticleService {
 
   async findAllByUser(userId) {
     const {Article} = (await sequelize()).models;
-    return (await Article.findAll({where: {'author_id': userId}}))
+    return (await Article.findAll({where: {'author_id': userId}, order: [[`date_create`, `DESC`]]}))
       .map((offer) => offer.toJSON());
   }
 
   async findPopular() {
     const {Article} = (await sequelize()).models;
     return (await Article.findAll({
-      attributes: [
-        [literal(`(SELECT COUNT(article_id) FROM "comments" WHERE "comments"."article_id" = "Article"."id")`), `commentsCount`]
-      ],
-      // attributes: {
-      //   include: [
-      //     [literal(`(SELECT COUNT(article_id) FROM "comments" WHERE "comments"."article_id" = "Article"."id")`), `commentsCount`],
-      //   ]
-      // },
-      where: literal(`"commentsCount" > 0`),
-      include: [`comments`],
+      attributes: {
+        include: [
+          [literal(`(SELECT COUNT(article_id) FROM "comments" WHERE "comments"."article_id" = "Article"."id")`), `commentsCount`],
+        ]
+      },
+      // where: [
+      //   literal(`"commentsCount" > 0`)
+      // ],
       limit: POPULAR_LIMIT,
       order: [literal(`"commentsCount" DESC`)]
     })).map((article) => article.toJSON());

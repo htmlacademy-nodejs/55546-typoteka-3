@@ -8,12 +8,10 @@ block content
         button.popup__button.button.button--popup-close(type='button', aria-label='Закрыть окно') Закрыть окно
         h2.visually-hidden Форма регистрации
         ul.popup__tabs
-          li.popup__tab.popup__tab--register(class= `${form !== `login` ? `popup__tab--active` : ``}`)
+          li.popup__tab.popup__tab--register
             button.popup__tab-switcher.button(type='button') Регистрация
-          li.popup__tab.popup__tab--log-in(class= `${form === `login` ? `popup__tab--active` : ``}`)
-            button.popup__tab-switcher.button(type='button') Войти
-        .popup__form.popup__form--active.form.form--register(class= `${form === `login` ? `popup__form--hidden` : ``}`)
-          form(action='/register', method='post', enctype='multipart/form-data' novalidate)
+        .popup__form.popup__form--active.form.form--register
+          form(action='/register', method='post', enctype='multipart/form-data', novalidate)
             .form__field
               label
                 input(type='email', name='email', placeholder='Электронная почта', required, value= data.email ? data.email : ``)
@@ -43,22 +41,6 @@ block content
                 | Загрузить фото профиля
             input(type='hidden' name='_csrf' value= csrf)
             button.form__submit-btn.form__submit-btn--register.button.button--colored(type='submit') Зарегистрироваться
-        .popup__form.form.form--log-in(class= `${form !== `login` ? `popup__form--hidden` : ``}`)
-          form(action='/login', method='post' novalidate)
-            .form__field
-              label
-                input(type='email', name='email', placeholder='Электронная почта', required, value= data.email ? data.email : ``)
-            .form__field
-              label
-                input(type='password', name='password', placeholder='Пароль', required)
-            if errors
-              .form__validation-error
-                p.form__error-message При авторизации произошли ошибки:
-                ul
-                  each error in errors
-                    li.form__error= error
-            input(type='hidden' name='_csrf' value= csrf)
-            button.form__submit-btn.form__submit-btn--log-in.button.button--colored(type='submit') Войти
       .modal__overlay
 block scripts
   script(src='/js/main.js')

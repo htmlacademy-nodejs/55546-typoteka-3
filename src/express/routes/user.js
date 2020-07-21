@@ -50,7 +50,6 @@ route.post(`/register`, [csrfMiddleware, multer({storage: multerStorage}).single
   }
 
   res.render(`registration`, {
-    form: null,
     errors,
     data: body,
     csrf: req.csrfToken()
@@ -58,8 +57,7 @@ route.post(`/register`, [csrfMiddleware, multer({storage: multerStorage}).single
 });
 
 route.get(`/login`, csrfMiddleware, (req, res) => {
-  res.render(`registration`, {
-    form: `login`,
+  res.render(`login`, {
     errors: null,
     data: {},
     csrf: req.csrfToken()
@@ -86,8 +84,7 @@ route.post(`/login`, csrfMiddleware, async (req, res) => {
     logger.error(`Ошибка при авторизации: ${err}`);
   }
 
-  res.render(`registration`, {
-    form: `login`,
+  res.render(`login`, {
     errors,
     data: body,
     csrf: req.csrfToken()
