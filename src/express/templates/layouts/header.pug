@@ -9,12 +9,21 @@ header.header
           a.header__registration(href='/register') Регистрация
         li.header__list-item
           a.header__enter(href='/login') Вход с паролем
-      else
+      else if user.id !== 1
         li.header__list-item
           p= user.name
         li.header__list-item
           a.header__exit(href='/logout') Выйти
-  if user
+      else
+        a.button.button--colored.header__button-new(href='/articles/add') Новая запись
+        .header__dropdown
+          a.button.button--burger.header__burger Открыть меню
+          ul.navigation.header__navigation
+            li.navigation__item
+              a(href='/my') Список публикации
+              a(href='/my/comments') Список комментариев
+              a(href='/categories') Список категорий
+  if user && user.id !== 1
     a.header__avatar.avatar
-      img(src='img/avatar-2.png', alt='аватар пользователя')
+    img(src='img/avatar-2.png', alt='аватар пользователя')
   a.header__search.button.button--search(href='/search', aria-label='поиск по сайту')

@@ -1,6 +1,6 @@
 'use strict';
 
-const {literal} = require(`sequelize`);
+const {literal, Op} = require(`sequelize`);
 const sequelize = require(`../db/sequelize`);
 
 const POPULAR_LIMIT = 4;
@@ -85,6 +85,11 @@ class ArticleService {
           [literal(`(SELECT COUNT(article_id) FROM "comments" WHERE "comments"."article_id" = "Article"."id")`), `commentsCount`],
         ]
       },
+      // where: {
+      //   commentsCount: {
+      //     [Op.gt]: 0
+      //   }
+      // },
       // where: [
       //   literal(`"commentsCount" > 0`)
       // ],

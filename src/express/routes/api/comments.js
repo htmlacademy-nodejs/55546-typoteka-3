@@ -9,7 +9,7 @@ const logger = require(`../../../logger`).getLogger();
 const validatorMiddleware = require(`../../middleware/validator-post`);
 const paramValidator = require(`../../middleware/validator-params`);
 
-const commentSchemaValidator = require(`../../validators/article`);
+const commentSchemaValidator = require(`../../validators/comment`);
 
 module.exports = async (app, ClassService) => {
   logger.info(`Подключение comments api`);
@@ -17,6 +17,17 @@ module.exports = async (app, ClassService) => {
   const service = new ClassService();
 
   app.use(`/api/comments`, route);
+
+  // GET / api / comments / check-is-author / :commentId / :userId - проверка, является ли пользователь автором комментария
+  route.get(`/check-is-author/:commentId/:userId`, async (req, res) => {
+    const {commentId, userId} = req.params;
+    return res.status(200).json(await service.checkIsAuthor(commentId, userId));
+  });
+
+  // GET / api / comments / all - возвращает список всех комментариев
+  route.get(`/all`, async (req, res) => {
+    return res.status(200).json(await service.findAll());
+  });
 
   // GET / api / comments / last - возвращает список последних комментариев на сайте
   route.get(`/last`, async (req, res) => {
@@ -39,11 +50,8 @@ module.exports = async (app, ClassService) => {
   });
 
   // POST / api / comments /: articleId — создаёт новый комментарий
-  route.post(`/:articleId`, [
-    paramValidator(`articleId`, `number`),
-    validatorMiddleware(commentSchemaValidator)
-  ], async (req, res) => {
-    return res.status(200).json(await service.create(+req.params.articleId, req.body));
+  route.post(`/:articleId`, validatorMiddleware(commentSchemaValidator), async (req, res) => {
+    return res.status(200).json(await service.create(req.body));
   });
 
   // PUT / api / comments /: commentId — обновляет указанный комментарий

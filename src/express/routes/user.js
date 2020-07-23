@@ -9,6 +9,7 @@ const logger = require(`../../logger`).getLogger();
 const csrf = require(`csurf`);
 
 const multer = require(`multer`);
+const authenticate = require(`../middleware/authenticate`);
 const multerStorage = multer.diskStorage({
   destination(req, file, cb) {
     cb(null, path.join(__dirname, `../../tmp`));
@@ -20,6 +21,17 @@ const multerStorage = multer.diskStorage({
 
 const csrfMiddleware = csrf();
 
+route.post(`/comment-delete/:id`, authenticate, async (req, res) => {
+  try {
+    await axios.delete(getUrlRequest(req, `/api/comments/${req.params.id}`));
+    logger.info(`Комментарий был удалён.`);
+  } catch (err) {
+    logger.error(`Ошибка при удалении комментария: ${err}`);
+  }
+
+  res.redirect(`/my/comments`);
+});
+
 route.get(`/register`, csrfMiddleware, (req, res) => {
   res.render(`registration`, {
     errors: null,
@@ -28,7 +40,7 @@ route.get(`/register`, csrfMiddleware, (req, res) => {
   });
 });
 
-route.post(`/register`, [csrfMiddleware, multer({storage: multerStorage}).single(`avatar`)], async (req, res) => {
+route.post(`/register`, [multer({storage: multerStorage}).single(`avatar`), csrfMiddleware], async (req, res) => {
   const {file, body} = req;
   let errors = null;
 

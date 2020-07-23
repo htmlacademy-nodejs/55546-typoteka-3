@@ -1,5 +1,6 @@
 'use strict';
 
+const moment = require(`moment`);
 const path = require(`path`);
 const axios = require(`axios`);
 const router = require(`express`).Router;
@@ -22,6 +23,7 @@ const {PAGINATION_LIMIT} = require(`../../const`);
 const authenticate = require(`../middleware/authenticate`);
 
 const paramValidator = require(`../middleware/validator-params`);
+const checkLogin = require(`../middleware/check-login`);
 
 route.get(`/category/:categoryId`, paramValidator(`categoryId`, `number`), async (req, res) => {
   const {categoryId} = req.params;
@@ -70,14 +72,55 @@ route.get(`/add`, authenticate, async (req, res) => {
 
 route.get(`/:id`, paramValidator(`id`, `number`), async (req, res) => {
   let article = {};
+  let errors = null;
+
   try {
     article = (await axios.get(getUrlRequest(req, `/api/articles/${req.params.id}`))).data;
+    article[`date_create`] = moment(article[`date_create`]).format(`DD.MM.YYYY hh:mm`);
+    article.comments.forEach((comment) => {
+      comment[`date_create`] = moment(comment[`date_create`]).format(`DD.MM.YYYY hh:mm`);
+    });
   } catch (err) {
     logger.error(`Ошибка при получении статьи: ${err}`);
   }
 
+  res.render(`article`, {article, errors});
+});
 
-  res.render(`article`, {article});
+route.post(`/:id`, checkLogin, async (req, res) => {
+  const {id} = req.params;
+  let article = {};
+  let errors = null;
+
+  try {
+    article = (await axios.get(getUrlRequest(req, `/api/articles/${req.params.id}`))).data;
+    article[`date_create`] = moment(article[`date_create`]).format(`DD.MM.YYYY hh:mm`);
+    article.comments.forEach((comment) => {
+      comment[`date_create`] = moment(comment[`date_create`]).format(`DD.MM.YYYY hh:mm`);
+    });
+  } catch (err) {
+    logger.error(`Ошибка при получении статьи: ${err}`);
+  }
+
+  try {
+    await axios.post(getUrlRequest(req, `/api/comments/${id}`),
+        JSON.stringify({
+          [`author_id`]: +req.session[`user_id`],
+          [`article_id`]: +id,
+          [`date_create`]: new Date(),
+          text: req.body.text,
+        }),
+        {headers: {'Content-Type': `application/json`}});
+    logger.info(`Комментарий был успешно создан.`);
+  } catch (err) {
+    if (err.response && err.response.data) {
+      errors = err.response.data.message;
+      logger.error(`Ошибка валидации: ${errors}`);
+    }
+    logger.error(`Ошибка при создании комментария: ${err}`);
+  }
+
+  res.render(`article`, {article, errors});
 });
 
 route.post(`/add`, authenticate, multer({storage: multerStorage}).single(`img`), async (req, res) => {

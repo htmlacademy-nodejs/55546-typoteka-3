@@ -8,5 +8,7 @@ module.exports = Joi.object({
     'string.max': `Максимальная длинна комментария {#limit} символа`,
     'string.required': `Поле обязательно к заполнению`,
   }),
+  'article_id': Joi.any().required(),
+  'author_id': Joi.any().required(),
   'date_create': Joi.date(),
 });

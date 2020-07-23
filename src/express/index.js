@@ -24,6 +24,7 @@ const dataServiceUser = require(`../service/data-service/user`);
 
 const articlesRoute = require(`./routes/articles`);
 const userRoute = require(`./routes/user`);
+const categoriesRoute = require(`./routes/categories`);
 
 const getUser = require(`./middleware/get-user`);
 
@@ -57,5 +58,6 @@ app.use(appRoutes);
 
 app.use(`/`, userRoute);
 app.use(`/articles`, articlesRoute);
+app.use(`/categories`, categoriesRoute);
 
 module.exports = app;

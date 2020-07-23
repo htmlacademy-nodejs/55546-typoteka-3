@@ -7,11 +7,12 @@ block content
       ul.publication__list
         each comment in comments
           li.publication__list-item
-            .publication__header
-              img.publication__list-image(src='/img/avatar-small-2.png', width='20', height='20', alt='Аватар пользователя')
-              b.publication__list-name= comment.author.name
-              time.publication__item-time(datetime='2019-03-21T20:33')= comment.date_create
-            a.publication__item-text(href='#')= comment.text
-            p.publication__text-strong= comment.article.title
-            button.publication__button.button.button--close-item(type='button')
-              span.visually-hidden Закрыть строку списка
+            form(method=`post` action=`/comment-delete/${comment.id}`)
+              .publication__header
+                img.publication__list-image(src='/img/avatar-small-2.png', width='20', height='20', alt='Аватар пользователя')
+                b.publication__list-name= `${comment.author.name} ${comment.author.surname}`
+                time.publication__item-time(datetime='2019-03-21T20:33')= comment.date_create
+              a.publication__item-text(href=`/articles/${comment.article.id}`)= comment.text
+              p.publication__text-strong= comment.article.title
+              button.publication__button.button.button--close-item(type='submit')
+                span.visually-hidden Закрыть строку списка

@@ -14,8 +14,10 @@ class CommentService {
 
   async findAll() {
     const {Comment} = (await sequelize()).models;
-    return (await Comment.findAll({include: [`categories`]}))
-      .map((comment) => comment.toJSON());
+    return (await Comment.findAll({
+      include: [`author`, `article`],
+      order: [[literal(`"date_create"`), `DESC`]]
+    })).map((comment) => comment.toJSON());
   }
 
   async findAllByArticleId(id) {
@@ -40,6 +42,16 @@ class CommentService {
       limit: LAST_PERSONAL_LIMIT,
       order: [[literal(`"date_create"`), `DESC`]]
     })).map((comment) => comment.toJSON());
+  }
+
+  async checkIsAuthor(commentId, userId) {
+    const {Comment} = (await sequelize()).models;
+    return (await Comment.findOne({
+      where: {
+        [`id`]: commentId,
+        [`author_id`]: userId,
+      },
+    })) ? true : false;
   }
 
   async create(data) {
