@@ -11,7 +11,6 @@ const multer = require(`multer`);
 const {PAGINATION_LIMIT, UPLOADED_PATH, ADMIN_ID} = require(`../../const`);
 const authenticate = require(`../middleware/authenticate`);
 const paramValidator = require(`../middleware/validator-params`);
-const checkLogin = require(`../middleware/check-login`);
 const {unlink} = require(`fs`).promises;
 
 const ALLOW_FILE_EXT = [`.jpg`, `.png`];
@@ -27,7 +26,7 @@ const multerStorage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => cb(null, ALLOW_FILE_EXT.includes(path.extname(file.originalname)));
 
-route.post(`/delete/:id`, async (req, res) => {
+route.post(`/delete/:id`, authenticate, async (req, res) => {
   let articleImg = null;
   try {
     const article = (await axios.get(getUrlRequest(req, `/api/articles/${req.params.id}`))).data;
@@ -161,10 +160,10 @@ route.get(`/:id`, paramValidator(`id`, `number`), async (req, res) => {
     logger.error(`Ошибка при получении статьи: ${err}`);
   }
 
-  res.render(`article`, {article, errors});
+  res.render(`article`, {article, errors, refLink: req.headers.referer});
 });
 
-route.post(`/:id`, checkLogin, async (req, res) => {
+route.post(`/:id`, async (req, res) => {
   const {id} = req.params;
   let article = {};
   let errors = null;
@@ -197,7 +196,7 @@ route.post(`/:id`, checkLogin, async (req, res) => {
     logger.error(`Ошибка при создании комментария: ${err}`);
   }
 
-  res.render(`article`, {article, errors});
+  res.render(`article`, {article, errors, refLink: req.headers.referer});
 });
 
 route.get(`/edit/:id`, [authenticate, paramValidator(`id`, `number`)], async (req, res) => {

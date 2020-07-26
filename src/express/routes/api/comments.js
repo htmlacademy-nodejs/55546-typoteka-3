@@ -18,12 +18,6 @@ module.exports = async (app, ClassService) => {
 
   app.use(`/api/comments`, route);
 
-  // GET / api / comments / check-is-author / :commentId / :userId - проверка, является ли пользователь автором комментария
-  route.get(`/check-is-author/:commentId/:userId`, async (req, res) => {
-    const {commentId, userId} = req.params;
-    return res.status(200).json(await service.checkIsAuthor(commentId, userId));
-  });
-
   // GET / api / comments / all - возвращает список всех комментариев
   route.get(`/all`, async (req, res) => {
     return res.status(200).json(await service.findAll());
