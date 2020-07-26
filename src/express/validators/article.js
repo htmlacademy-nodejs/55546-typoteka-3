@@ -8,10 +8,10 @@ module.exports = Joi.object({
     'string.max': `Максимальная длинна заголовка {#limit} символа`,
     'string.required': `Поле обязательно к заполнению`,
   }),
-  'img': Joi.string(),
+  'img': Joi.string().pattern(/\.(jpg|png)$/),
   'announce': Joi.string().min(30).max(250).required(),
   'full_text': Joi.string().max(1000),
-  'categories': Joi.array().items(Joi.number().required()).required(),
-  'date_create': Joi.date().required(),
+  'categories': Joi.array().items(Joi.any().required()).required(),
+  'date_create': Joi.any().required(),
   'author_id': Joi.number().required(),
 });

@@ -41,4 +41,9 @@ module.exports = async (app, ClassService) => {
     const {articleId, categories} = req.body;
     res.status(200).json(await service.setArticleCategory(articleId, categories));
   });
+
+  route.delete(`/delete-by-article/:id`, async (req, res) => {
+    await service.deleteByArticle(req.params.id);
+    res.status(200);
+  });
 };

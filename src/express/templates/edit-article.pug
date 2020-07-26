@@ -6,12 +6,6 @@ block content
       .popup.popup--new-publication.popup--flex
         .new-publication
           form(action=`/articles/edit/${article.id}`, method='post', enctype='multipart/form-data', autocomplete='off')
-            if errors
-              .form__validation-error
-                p.form__error-message При редактировании статьи произошли ошибки:
-                ul
-                  each error in errors
-                    li.form__error= error
             .new-publication__header
               h1 Новая публикация
               .new-publication__date-form
@@ -27,6 +21,8 @@ block content
                 .form__field
                   label
                     input(type='text', name='title', placeholder='Заголовок', required, value= article.title || '')
+                if objectError.title
+                  .form__error-message= objectError.title
                 .form__field.form__field--post-image
                   label
                     input#image-name-field(type='text', placeholder='Фотография', readonly, value= article.img || '')
@@ -34,20 +30,32 @@ block content
                     label
                       input.visually-hidden(type='file', name='img')
                       | Обзор
+                if objectError.img
+                  .form__error-message= objectError.img
                 each category in categories
                   .new-publication__checkbox.new-publication__checkbox--auto
                     input(type=`checkbox` name=`categories[]` id=`category-${category.id}` value= category.id
                       checked=(article.categories || []).some((it) => +it.id === +category.id))
                     label(for=`category-${category.id}`)= category.title
-
-                a.new-publication__form-link.button.button--transparent(href='#') Добавить категорию
+                if objectError.categories
+                  .form__error-message= objectError.categories
               .form__wrapper.form__wrapper--text
                 .form__field.form__field--publication-text
                   label
                     textarea(rows='1', name='announce', placeholder='Анонс публикации')= article.announce || ''
+                if objectError.announce
+                  .form__error-message= objectError.announce
                 .form__field.form__field--publication-text
                   label
                     textarea(rows='1', name='full_text', placeholder='Полный текст публикации')= article.full_text || ''
+                if objectError.full_text
+                  .form__error-message= objectError.full_text
+            if errors
+              .form__validation-error
+                p.form__error-message При редактировании статьи произошли ошибки:
+                ul
+                  each error in errors
+                    li.form__error= error
       .modal__overlay
 block scripts
   script(src='/js/vendor.js')

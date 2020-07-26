@@ -36,7 +36,7 @@ block content
           ul.last__list
             each comment in lastComments
               li.last__list-item
-                img.last__list-image(src='/img/avatar-small-1.png', width='20', height='20', alt='Аватар пользователя')
+                img.last__list-image(src= `/upload/users/${comment.author.avatar}`, width='20', height='20', alt='Аватар пользователя')
                 b.last__list-name= `${comment.author.name} ${comment.author.surname}`
                 if comment.text
                   a.last__list-link(href=`/articles/${comment.article.id}`)= comment.text.length > 100 ? `${comment.text.slice(0, 100)}...` : comment.text
@@ -47,11 +47,14 @@ block content
           p.main-page__empty-text Здесь пока пусто!
       ul.preview__list
         each article in articles
-          li.preview__item.preview__item--noimage
+          li.preview__item(class= article.img ? `` : `preview__item--noimage`)
             ul.preview__breadcrumbs
               each category in article.categories
                 li.preview__breadcrumbs-item
                   a.preview__breadcrumbs-link(href=`category/${category.id}`)= category.title
+            if article.img
+              .preview__background
+                img.preview__background-image(width="460", height="240", src= `/upload/articles/${article.img}`)
             time.preview__time(datetime=article.date_create)= article.date_create
             h3.preview__name
               a.preview__name-link(href=`/articles/${article.id}`)= article.title

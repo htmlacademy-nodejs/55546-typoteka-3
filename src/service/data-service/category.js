@@ -43,6 +43,11 @@ class CategoryService {
     await ArticleCategory.bulkCreate(categories.map(
         (categoryId) => ({'article_id': +articleId, 'category_id': +categoryId})));
   }
+
+  async deleteByArticle(articleId) {
+    const {ArticleCategory} = (await sequelize()).models;
+    await ArticleCategory.destroy({where: {'article_id': +articleId}});
+  }
 }
 
 module.exports = CategoryService;

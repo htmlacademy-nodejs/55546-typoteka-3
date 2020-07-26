@@ -25,5 +25,5 @@ header.header
               a(href='/categories') Список категорий
   if user && user.id !== 1
     a.header__avatar.avatar
-    img(src='img/avatar-2.png', alt='аватар пользователя')
+      img(src=`/upload/users/${user.avatar}`, alt='аватар пользователя')
   a.header__search.button.button--search(href='/search', aria-label='поиск по сайту')

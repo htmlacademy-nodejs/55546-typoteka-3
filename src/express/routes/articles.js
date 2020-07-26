@@ -6,24 +6,43 @@ const axios = require(`axios`);
 const router = require(`express`).Router;
 const route = router();
 const {getUrlRequest, pagination} = require(`../../utils`);
-
 const logger = require(`../../logger`).getLogger();
-
 const multer = require(`multer`);
+const {PAGINATION_LIMIT, UPLOADED_PATH, ADMIN_ID} = require(`../../const`);
+const authenticate = require(`../middleware/authenticate`);
+const paramValidator = require(`../middleware/validator-params`);
+const checkLogin = require(`../middleware/check-login`);
+const {unlink} = require(`fs`).promises;
+
+const ALLOW_FILE_EXT = [`.jpg`, `.png`];
+
 const multerStorage = multer.diskStorage({
   destination(req, file, cb) {
-    cb(null, path.join(__dirname, `../../tmp`));
+    cb(null, `${UPLOADED_PATH}/articles/`);
   },
   filename(req, file, cb) {
-    cb(null, file.originalname);
+    cb(null, `${+(Date.now())}${path.extname(file.originalname)}`);
   }
 });
 
-const {PAGINATION_LIMIT} = require(`../../const`);
-const authenticate = require(`../middleware/authenticate`);
+const fileFilter = (req, file, cb) => cb(null, ALLOW_FILE_EXT.includes(path.extname(file.originalname)));
 
-const paramValidator = require(`../middleware/validator-params`);
-const checkLogin = require(`../middleware/check-login`);
+route.post(`/delete/:id`, async (req, res) => {
+  // console.log(path.join(__dirname, ``));
+  // try {
+  //   await axios.delete(getUrlRequest(req, `/api/articles/${req.params.id}`));
+  // } catch (err) {
+  //   logger.error(`Ошибка при удалении статьи: ${err}`);
+  // }
+
+  try {
+    // unlink(`p`);
+  } catch (err) {
+    logger.error(`Ошибка при удалении изображения статьи: ${err}`);
+  }
+
+  res.redirect(`/my`);
+});
 
 route.get(`/category/:categoryId`, paramValidator(`categoryId`, `number`), async (req, res) => {
   const {categoryId} = req.params;
@@ -67,8 +86,55 @@ route.get(`/add`, authenticate, async (req, res) => {
     logger.error(`Ошибка при получении списка категорий`);
   }
 
-  res.render(`create-article`, {categories, article: {}});
+  res.render(`create-article`, {categories, article: {}, objectError: {}});
 });
+
+route.post(`/add`, authenticate, multer({storage: multerStorage, fileFilter}).single(`img`), async (req, res) => {
+  const {body, file} = req;
+  let errors = null;
+  let objectError = {};
+
+  if (file) {
+    body.img = file.filename;
+  }
+
+  let categories = [];
+  try {
+    categories = (await axios.get(getUrlRequest(req, `/api/categories`))).data;
+  } catch (err) {
+    logger.error(`Ошибка при получении списка категорий`);
+  }
+
+  try {
+    const article = await axios.post(getUrlRequest(req, `/api/articles`), JSON.stringify({
+      'title': body[`title`],
+      'img': body[`img`],
+      'announce': body[`announce`],
+      'full_text': body[`full_text`],
+      'date_create': !body[`date_create`] ? Date.now() : +(new Date(body[`date_create`].split(`.`).reverse().join(`-`))),
+      'categories': body[`categories`],
+      'author_id': ADMIN_ID,
+    }), {headers: {'Content-Type': `application/json`}});
+
+    await axios.post(getUrlRequest(req, `/api/categories/set-article-categories`),
+        JSON.stringify({articleId: article.data.id, categories: body.categories}),
+        {headers: {'Content-Type': `application/json`}}).data;
+
+    logger.info(`Создано новое предложение ${article.data.id}`);
+    res.redirect(`/my`);
+    return;
+  } catch (err) {
+    if (err.response && err.response.data) {
+      errors = err.response.data.message;
+      objectError = err.response.data.object;
+      logger.error(`Ошибка валидации: ${errors}`);
+    }
+    logger.error(`Ошибка при создании новой статьи: ${err}`);
+  }
+
+  res.render(`create-article`, {categories, article: body, errors, objectError});
+});
+
 
 route.get(`/:id`, paramValidator(`id`, `number`), async (req, res) => {
   let article = {};
@@ -123,48 +189,6 @@ route.post(`/:id`, checkLogin, async (req, res) => {
   res.render(`article`, {article, errors});
 });
 
-route.post(`/add`, authenticate, multer({storage: multerStorage}).single(`img`), async (req, res) => {
-  const {body, file} = req;
-  let errors = null;
-
-  if (file) {
-    body.img = file.filename;
-  }
-
-  let categories = [];
-  try {
-    categories = (await axios.get(getUrlRequest(req, `/api/categories`))).data;
-  } catch (err) {
-    logger.error(`Ошибка при получении списка категорий`);
-  }
-
-  try {
-    const article = await axios.post(getUrlRequest(req, `/api/articles`), JSON.stringify({
-      'title': body[`title`],
-      'img': body[`img`],
-      'announce': body[`announce`],
-      'full_text': body[`full_text`],
-      'author_id': 1,
-    }), {headers: {'Content-Type': `application/json`}});
-
-    await axios.post(getUrlRequest(req, `/api/categories/set-article-categories`),
-        JSON.stringify({articleId: article.data.id, categories: body.categories}),
-        {headers: {'Content-Type': `application/json`}}).data;
-
-    logger.info(`Создано новое предложение ${article.data.id}`);
-    res.redirect(`/my`);
-    return;
-  } catch (err) {
-    if (err.response && err.response.data) {
-      errors = err.response.data.message;
-      logger.error(`Ошибка валидации: ${errors}`);
-    }
-    logger.error(`Ошибка при создании новой статьи: ${err}`);
-  }
-
-  res.render(`create-article`, {categories, article: body, errors});
-});
-
 route.get(`/edit/:id`, [authenticate, paramValidator(`id`, `number`)], async (req, res) => {
   let article = {};
   try {
@@ -181,7 +205,7 @@ route.get(`/edit/:id`, [authenticate, paramValidator(`id`, `number`)], async (re
     logger.error(`Ошибка при получении предложения`);
   }
 
-  res.render(`edit-article`, {article, categories});
+  res.render(`edit-article`, {article, categories, objectError: {}});
 });
 
 route.post(`/edit/:id`, [
@@ -191,6 +215,7 @@ route.post(`/edit/:id`, [
 ], async (req, res) => {
   const {file, body, params} = req;
   let errors = null;
+  let objectError = {};
 
   let article = {};
   try {
@@ -225,12 +250,13 @@ route.post(`/edit/:id`, [
   } catch (err) {
     if (err.response && err.response.data) {
       errors = err.response.data.message;
+      objectError = err.response.data.object;
       logger.error(`Ошибка валидации: ${errors}`);
     }
     logger.error(`Ошибка при редактировании публикации (${params.id}): ${err}`);
   }
 
-  res.render(`edit-article`, {article, categories, errors});
+  res.render(`edit-article`, {article, categories, errors, objectError});
 });
 
 module.exports = route;

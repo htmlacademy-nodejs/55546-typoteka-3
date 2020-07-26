@@ -10,14 +10,21 @@ const csrf = require(`csurf`);
 
 const multer = require(`multer`);
 const authenticate = require(`../middleware/authenticate`);
+const {UPLOADED_PATH} = require(`../../const`);
+
+const ALLOW_FILE_EXT = [`.jpg`, `.png`];
+
 const multerStorage = multer.diskStorage({
   destination(req, file, cb) {
-    cb(null, path.join(__dirname, `../../tmp`));
+    cb(null, `${UPLOADED_PATH}/users/`);
   },
   filename(req, file, cb) {
-    cb(null, file.originalname);
+    cb(null, `${+(Date.now())}${path.extname(file.originalname)}`);
   }
 });
+
+const fileFilter = (req, file, cb) => cb(null, ALLOW_FILE_EXT.includes(path.extname(file.originalname)));
+
 
 const csrfMiddleware = csrf();
 
@@ -40,7 +47,7 @@ route.get(`/register`, csrfMiddleware, (req, res) => {
   });
 });
 
-route.post(`/register`, [multer({storage: multerStorage}).single(`avatar`), csrfMiddleware], async (req, res) => {
+route.post(`/register`, [multer({storage: multerStorage, fileFilter}).single(`avatar`), csrfMiddleware], async (req, res) => {
   const {file, body} = req;
   let errors = null;
 

@@ -16,8 +16,9 @@ block content
                 li.themes__item
                   a.themes__item-link(href=`/articles/category/${category.id}`)= category.title
                     sup= category.articlesCount
-          .post__picture
-            img(src='img/sea-fullsize@1x.jpg')
+          if article.img
+            .post__picture
+              img(src= `/upload/articles/${article.img}`)
           .post__text
             h3= article.title
             p= article.announce
@@ -32,7 +33,7 @@ block content
               each comment in article.comments
                 li.comments__comment
                   .comments__avatar.avatar
-                    img(src='img/avatar-1.png', alt='аватар пользователя')
+                    img(src=`/upload/users/${comment.author.avatar}`, alt='аватар пользователя')
                   .comments__text
                     .comments__head
                       p= `${comment.author.name} ${comment.author.surname}`
@@ -42,7 +43,7 @@ block content
             .comments__footer.comments__footer--user
               form(action=`/articles/${article.id}`, method='post')
                 .comments__avatar.avatar
-                  img(src='img/avatar-2.png', alt='аватар пользователя')
+                  img(src=`/upload/users/${user.avatar}`, alt='аватар пользователя')
                 label
                   textarea(name=`text`, rows='1', placeholder='Присоединиться к обсуждению')
                 button.comments__button.button.button--colored(type='submit') Опубликовать

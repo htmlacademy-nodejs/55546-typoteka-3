@@ -73,8 +73,7 @@ appRouter.get(`/my`, authenticate, async (req, res) => {
   res.render(`personal-publications`, {articles});
 });
 
-// appRouter.get(`/my/comments`, authenticate, async (req, res) => {
-appRouter.get(`/my/comments`, async (req, res) => {
+appRouter.get(`/my/comments`, authenticate, async (req, res) => {
   let comments = [];
   try {
     comments = (await axios.get(getUrlRequest(req, `/api/comments/all`))).data;

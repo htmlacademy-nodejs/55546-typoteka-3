@@ -16,7 +16,9 @@ build/
 
 mock.json
 
-src/tmp/*
+src/express/public/upload/articles/*
+src/express/public/upload/users/*
+
 !.placeholder
 
 .env

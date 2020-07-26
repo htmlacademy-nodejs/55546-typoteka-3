@@ -64,7 +64,7 @@ module.exports = async (app, ClassService) => {
   });
 
   // POST / api / articles — создаёт новую публикацию;
-  route.post(`/`, validatorMiddleware(articleSchemaValidator), async (req, res) => {
+  route.post(`/`, validatorMiddleware(articleSchemaValidator, true), async (req, res) => {
     try {
       const article = await service.create(req.body);
       res.status(200).json(article.dataValues);
@@ -78,7 +78,7 @@ module.exports = async (app, ClassService) => {
   // PUT / api / articles /: articleId — редактирует определённую публикацию;
   route.put(`/:articleId`, [
     pararmValidator(`articleId`, `number`),
-    validatorMiddleware(articleSchemaValidator)
+    validatorMiddleware(articleSchemaValidator, true)
   ], async (req, res) => {
     try {
       const article = await service.update(req.params.articleId, req.body);
@@ -91,7 +91,7 @@ module.exports = async (app, ClassService) => {
   });
 
   // DELETE / api / articles /: articleId — удаляет публикацию;
-  route.delete(`/:articleId`, pararmValidator(`articleId`, `number`), async (req, res) => {
+  route.delete(`/:articleId`, async (req, res) => {
     const {articleId} = req.params;
     try {
       await service.delete(articleId);
