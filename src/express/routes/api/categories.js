@@ -36,6 +36,20 @@ module.exports = async (app, ClassService) => {
     res.status(200).json(await service.findOne(id));
   });
 
+  route.put(`/:id`, validatorMiddleware(categorySchemaValidator), async (req, res) => {
+    await service.update(req.params.id, req.body);
+    res.status(200);
+  });
+
+  route.delete(`/:id`, async (req, res) => {
+    if (!(await service.checkIsAddedCategories(req.params.id))) {
+      await service.delete(req.params.id);
+      return res.status(200);
+    }
+
+    return res.status(400).json({message: `У категории уже есть привязанные статьи и её нельзя удалить.`});
+  });
+
   route.post(`/set-article-categories`, async (req, res) => {
     logger.info(`Добавления списка категорий к публикации`);
     const {articleId, categories} = req.body;

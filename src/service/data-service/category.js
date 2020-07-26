@@ -48,6 +48,12 @@ class CategoryService {
     const {ArticleCategory} = (await sequelize()).models;
     await ArticleCategory.destroy({where: {'article_id': +articleId}});
   }
+
+  async checkIsAddedCategories(categoryId) {
+    const {ArticleCategory} = (await sequelize()).models;
+    const article = await ArticleCategory.findOne({where: {'category_id': +categoryId}});
+    return article ? true : false;
+  }
 }
 
 module.exports = CategoryService;

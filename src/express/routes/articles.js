@@ -28,17 +28,28 @@ const multerStorage = multer.diskStorage({
 const fileFilter = (req, file, cb) => cb(null, ALLOW_FILE_EXT.includes(path.extname(file.originalname)));
 
 route.post(`/delete/:id`, async (req, res) => {
-  // console.log(path.join(__dirname, ``));
-  // try {
-  //   await axios.delete(getUrlRequest(req, `/api/articles/${req.params.id}`));
-  // } catch (err) {
-  //   logger.error(`Ошибка при удалении статьи: ${err}`);
-  // }
+  let articleImg = null;
+  try {
+    const article = (await axios.get(getUrlRequest(req, `/api/articles/${req.params.id}`))).data;
+    articleImg = article.img;
+  } catch (err) {
+    logger.error(`Ошибка при получении статьи: ${err}`);
+    res.redirect(`/my`);
+    return;
+  }
 
   try {
-    // unlink(`p`);
+    await axios.delete(getUrlRequest(req, `/api/articles/${req.params.id}`));
   } catch (err) {
-    logger.error(`Ошибка при удалении изображения статьи: ${err}`);
+    logger.error(`Ошибка при удалении статьи: ${err}`);
+  }
+
+  if (articleImg) {
+    try {
+      await unlink(`${UPLOADED_PATH}/articles/${articleImg}`);
+    } catch (err) {
+      logger.error(`Ошибка при удалении изображения статьи: ${err}`);
+    }
   }
 
   res.redirect(`/my`);
