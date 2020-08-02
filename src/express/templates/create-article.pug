@@ -35,7 +35,7 @@ block content
                 each category in categories
                   .new-publication__checkbox.new-publication__checkbox--auto
                     input(type=`checkbox` name=`categories[]` id=`category-${category.id}` value= category.id
-                    checked=(article.categories || []).some((it) => +it.id === +category.id))
+                    checked=(article.categories || []).some((it) => +it === +category.id))
                     label(for=`category-${category.id}`)= category.title
                 if objectError.categories
                   .form__error-message= objectError.categories

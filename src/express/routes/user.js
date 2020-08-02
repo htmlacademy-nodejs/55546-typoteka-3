@@ -7,12 +7,10 @@ const route = router();
 const {getUrlRequest} = require(`../../utils`);
 const logger = require(`../../logger`).getLogger();
 const csrf = require(`csurf`);
-
+const {unlink} = require(`fs`).promises;
 const multer = require(`multer`);
 const authenticate = require(`../middleware/authenticate`);
 const {UPLOADED_PATH} = require(`../../const`);
-
-const ALLOW_FILE_EXT = [`.jpg`, `.png`];
 
 const multerStorage = multer.diskStorage({
   destination(req, file, cb) {
@@ -22,9 +20,6 @@ const multerStorage = multer.diskStorage({
     cb(null, `${+(Date.now())}${path.extname(file.originalname)}`);
   }
 });
-
-const fileFilter = (req, file, cb) => cb(null, ALLOW_FILE_EXT.includes(path.extname(file.originalname)));
-
 
 const csrfMiddleware = csrf();
 
@@ -40,6 +35,7 @@ route.post(`/comment-delete/:id`, authenticate, async (req, res) => {
 });
 
 route.get(`/register`, csrfMiddleware, (req, res) => {
+
   res.render(`registration`, {
     errors: null,
     data: {},
@@ -47,7 +43,7 @@ route.get(`/register`, csrfMiddleware, (req, res) => {
   });
 });
 
-route.post(`/register`, [multer({storage: multerStorage, fileFilter}).single(`avatar`), csrfMiddleware], async (req, res) => {
+route.post(`/register`, [multer({storage: multerStorage}).single(`avatar`), csrfMiddleware], async (req, res) => {
   const {file, body} = req;
   let errors = null;
 
@@ -60,7 +56,14 @@ route.post(`/register`, [multer({storage: multerStorage, fileFilter}).single(`av
         {headers: {'Content-Type': `application/json`}});
     logger.info(`Регистрация прошла успешно`);
     res.redirect(`/login`);
+    return;
   } catch (err) {
+    try {
+      await unlink(`${UPLOADED_PATH}/users/${body.avatar}`);
+    } catch (fileErr) {
+      logger.info(`Файл к статье не был удалён: ${fileErr}`);
+    }
+
     if (err.response && err.response.data) {
       errors = err.response.data.message;
       logger.error(`Ошибка валидации: ${errors}`);

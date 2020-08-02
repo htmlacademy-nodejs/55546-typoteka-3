@@ -5,6 +5,8 @@ const GeneratorHelper = require(`../../generator-helper`);
 
 const chalk = require(`chalk`);
 const {getArticleData} = require(`../../utils`);
+const bcrypt = require(`bcrypt`);
+const {PASSWORD_SALT, ADMIN_ID} = require(`../../const`);
 
 const EXIT_CODE_ERROR = 1;
 const DEFAULT_ARTICLE_COUNT = 3;
@@ -20,6 +22,8 @@ const CommentsCount = {
   max: 10,
 };
 
+const DEFAULT_USER_PASSWORD = `123456`;
+
 module.exports = {
   name: `--fill`,
   async run(count) {
@@ -29,23 +33,23 @@ module.exports = {
     }
 
     const generator = new GeneratorHelper(await getArticleData());
+    const hashPassword = await bcrypt.hash(DEFAULT_USER_PASSWORD, PASSWORD_SALT);
 
-    const user = generator.createUser({
+    generator.createUser({
       id: 1,
-      name: 'Bob',
-      surname: 'Bobertov',
-      email: 'bob@mail.ru',
-      password: '123456',
-      avatar: 'avatar-1.jpg',
+      name: `Admin`,
+      surname: `Adminov`,
+      email: `admin@mail.ru`,
+      password: hashPassword,
+      avatar: `admin-1.jpg`,
     });
 
-    const user2 = generator.createUser({
-      id: 2,
-      name: 'Rob',
-      surname: 'Robertov',
-      email: 'rob@mail.ru',
-      password: '123456',
-      avatar: 'avatar-2.jpg',
+    generator.createUser({
+      name: `Rob`,
+      surname: `Robertov`,
+      email: `rob@mail.ru`,
+      password: hashPassword,
+      avatar: `avatar-2.jpg`,
     });
 
     const articleConfig = {
@@ -55,10 +59,8 @@ module.exports = {
       maxAnnounceCount: MAX_ANNOUNCE_COUNT,
     };
 
-    const halfArticlesCount = parseInt(DEFAULT_ARTICLE_COUNT / 2, 10);
-    const articles = Array.from({length: +(count || DEFAULT_ARTICLE_COUNT)}, (_it, idx) =>
-      generator.createArticle((idx > halfArticlesCount ? user2 : user).id, {...articleConfig, id: idx + 1})
-    );
+    Array.from({length: +(count || DEFAULT_ARTICLE_COUNT)}, (_it, idx) =>
+      generator.createArticle(ADMIN_ID, {...articleConfig, id: idx + 1}));
 
     try {
       await fs.writeFile(FILE_NAME, generator.generateSql());

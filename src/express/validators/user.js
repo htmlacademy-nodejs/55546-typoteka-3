@@ -14,7 +14,7 @@ module.exports = {
     'name': Joi.string().pattern(/^([A-zА-я]{3,30})$/).required(),
     'surname': Joi.string().pattern(/^([A-zА-я]{3,30})$/).required(),
     'password-again': Joi.ref(`password`),
-    'avatar': Joi.string().required()
+    'avatar': Joi.string().pattern(/\.(jpg|png)$/).required()
   }).with(`password`, `password-again`),
   login: Joi.object(login)
 };

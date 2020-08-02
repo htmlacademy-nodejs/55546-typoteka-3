@@ -10,10 +10,7 @@ const logger = require(`../../logger`).getLogger();
 const multer = require(`multer`);
 const {PAGINATION_LIMIT, UPLOADED_PATH, ADMIN_ID} = require(`../../const`);
 const authenticate = require(`../middleware/authenticate`);
-const paramValidator = require(`../middleware/validator-params`);
 const {unlink} = require(`fs`).promises;
-
-const ALLOW_FILE_EXT = [`.jpg`, `.png`];
 
 const multerStorage = multer.diskStorage({
   destination(req, file, cb) {
@@ -24,7 +21,7 @@ const multerStorage = multer.diskStorage({
   }
 });
 
-const fileFilter = (req, file, cb) => cb(null, ALLOW_FILE_EXT.includes(path.extname(file.originalname)));
+const getCorrectDate = (date) => date ? new Date(date.split(`.`).reverse().join(`.`)) : new Date();
 
 route.post(`/delete/:id`, authenticate, async (req, res) => {
   let articleImg = null;
@@ -54,7 +51,7 @@ route.post(`/delete/:id`, authenticate, async (req, res) => {
   res.redirect(`/my`);
 });
 
-route.get(`/category/:categoryId`, paramValidator(`categoryId`, `number`), async (req, res) => {
+route.get(`/category/:categoryId`, async (req, res) => {
   const {categoryId} = req.params;
   let currentCategory = null;
   try {
@@ -99,7 +96,7 @@ route.get(`/add`, authenticate, async (req, res) => {
   res.render(`create-article`, {categories, article: {}, objectError: {}});
 });
 
-route.post(`/add`, authenticate, multer({storage: multerStorage, fileFilter}).single(`img`), async (req, res) => {
+route.post(`/add`, authenticate, multer({storage: multerStorage}).single(`img`), async (req, res) => {
   const {body, file} = req;
   let errors = null;
   let objectError = {};
@@ -121,7 +118,7 @@ route.post(`/add`, authenticate, multer({storage: multerStorage, fileFilter}).si
       'img': body[`img`],
       'announce': body[`announce`],
       'full_text': body[`full_text`],
-      'date_create': !body[`date_create`] ? Date.now() : +(new Date(body[`date_create`].split(`.`).reverse().join(`-`))),
+      'date_create': moment(getCorrectDate(body[`date_create`])).format(`DD.MM.YYYY hh:mm`),
       'categories': body[`categories`],
       'author_id': ADMIN_ID,
     }), {headers: {'Content-Type': `application/json`}});
@@ -134,6 +131,12 @@ route.post(`/add`, authenticate, multer({storage: multerStorage, fileFilter}).si
     res.redirect(`/my`);
     return;
   } catch (err) {
+    try {
+      await unlink(`${UPLOADED_PATH}/articles/${body.img}`);
+    } catch (fileErr) {
+      logger.info(`Файл к статье не был удалён: ${fileErr}`);
+    }
+
     if (err.response && err.response.data) {
       errors = err.response.data.message;
       objectError = err.response.data.object;
@@ -145,8 +148,7 @@ route.post(`/add`, authenticate, multer({storage: multerStorage, fileFilter}).si
   res.render(`create-article`, {categories, article: body, errors, objectError});
 });
 
-
-route.get(`/:id`, paramValidator(`id`, `number`), async (req, res) => {
+route.get(`/:id`, async (req, res) => {
   let article = {};
   let errors = null;
 
@@ -199,7 +201,7 @@ route.post(`/:id`, async (req, res) => {
   res.render(`article`, {article, errors, refLink: req.headers.referer});
 });
 
-route.get(`/edit/:id`, [authenticate, paramValidator(`id`, `number`)], async (req, res) => {
+route.get(`/edit/:id`, authenticate, async (req, res) => {
   let article = {};
   try {
     article = (await axios.get(getUrlRequest(req, `/api/articles/${req.params.id}`))).data;
@@ -220,7 +222,6 @@ route.get(`/edit/:id`, [authenticate, paramValidator(`id`, `number`)], async (re
 
 route.post(`/edit/:id`, [
   authenticate,
-  paramValidator(`id`, `number`),
   multer({storage: multerStorage}).single(`img`)
 ], async (req, res) => {
   const {file, body, params} = req;
@@ -246,7 +247,7 @@ route.post(`/edit/:id`, [
   }
 
   try {
-    body[`date_create`] = +(new Date(body[`date_create`].split(`.`).reverse().join(`-`)));
+    body[`date_create`] = moment(getCorrectDate(body[`date_create`])).format(`DD.MM.YYYY hh:mm`);
     body[`author_id`] = article[`author_id`];
     await axios.put(getUrlRequest(req, `/api/articles/${params.id}`), JSON.stringify(body),
         {headers: {'Content-Type': `application/json`}});
@@ -257,7 +258,14 @@ route.post(`/edit/:id`, [
 
     logger.info(`Публикация была успешно отредактирована`);
     res.redirect(`/my`);
+    return;
   } catch (err) {
+    try {
+      await unlink(`${UPLOADED_PATH}/articles/${body.img}`);
+    } catch (fileErr) {
+      logger.info(`Файл к статье не был удалён: ${fileErr}`);
+    }
+
     if (err.response && err.response.data) {
       errors = err.response.data.message;
       objectError = err.response.data.object;

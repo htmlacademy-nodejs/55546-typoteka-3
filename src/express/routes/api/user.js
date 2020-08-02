@@ -18,6 +18,7 @@ module.exports = async (app, ClassService) => {
   const service = new ClassService();
 
   app.use(`/api/user`, route);
+
   route.post(`/`, validatorMiddleware(registerSchemaValidator), async (req, res) => {
     const {body} = req;
 

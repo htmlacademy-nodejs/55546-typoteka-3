@@ -47,23 +47,7 @@ block content
           p.main-page__empty-text Здесь пока пусто!
       ul.preview__list
         each article in articles
-          li.preview__item(class= article.img ? `` : `preview__item--noimage`)
-            ul.preview__breadcrumbs
-              each category in article.categories
-                li.preview__breadcrumbs-item
-                  a.preview__breadcrumbs-link(href=`category/${category.id}`)= category.title
-            if article.img
-              .preview__background
-                img.preview__background-image(width="460", height="240", src= `/upload/articles/${article.img}`)
-            time.preview__time(datetime=article.date_create)= article.date_create
-            h3.preview__name
-              a.preview__name-link(href=`/articles/${article.id}`)= article.title
-            p.preview__text= article.announce
-            a.preview__comment(href=`/articles/${article.id}`)
-              | Комментарии
-              span.preview__cloud
-              |
-              b.preview__comment-count= (article.comments || []).length
+          include _card-article.pug
       if pagination.isActive
         .preview__toggle-wrapper
           ul.preview__pagination.pagination
@@ -79,3 +63,5 @@ block content
             li
               a(href=`/?page=${pagination.next.page}`, aria-label="Страница вперёд",
                 class=`pagination__button button button--forward ${pagination.next.status ? `` : `button--disabled`}`) Вперед
+block scripts
+  script(src='/js/socket-client.js')

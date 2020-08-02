@@ -15,23 +15,7 @@ block content
       h2.visually-hidden Список превью статей
       ul.preview__list
         each article in articles
-          li.preview__item
-            ul.preview__breadcrumbs
-              each category in article.categories
-                li.preview__breadcrumbs-item
-                  a.preview__breadcrumbs-link(href=`/articles/category/${category.id}`)= category.title
-            .preview__background
-              img.preview__background-image(src='/img/skyscraper@1x.jpg', width='460', height='240',
-                srcset='/img/skyscraper@1x.jpg, /img/skyscraper@2x.jpg 2x', alt='Фотография небоскреба')
-            time.preview__time(datetime='2019-03-21T20:33')= article.date_create
-            h3.preview__name
-              a.preview__name-link(href=`/articles/${article.id}`)= article.title
-            p.preview__text= article.announce
-            a.preview__comment(href=`/articles/${article.id}#comments`)
-              | Комментарии
-              span.preview__cloud
-              |
-              b.preview__comment-count= article.comments.length
+          include _card-article.pug
       if pagination.isActive
         .preview__toggle-wrapper
           ul.preview__pagination.pagination

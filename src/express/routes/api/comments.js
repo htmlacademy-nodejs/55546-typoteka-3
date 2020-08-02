@@ -7,8 +7,6 @@ const route = router();
 const logger = require(`../../../logger`).getLogger();
 
 const validatorMiddleware = require(`../../middleware/validator-post`);
-const paramValidator = require(`../../middleware/validator-params`);
-
 const commentSchemaValidator = require(`../../validators/comment`);
 
 module.exports = async (app, ClassService) => {
@@ -34,12 +32,12 @@ module.exports = async (app, ClassService) => {
   });
 
   // GET / api / comments /: articleId / all — возвращает список комментариев конкретного предложения
-  route.get(`/:articleId/all`, paramValidator(`articleId`, `number`), async (req, res) => {
+  route.get(`/:articleId/all`, async (req, res) => {
     return res.status(200).json(await service.findAllByArticleId(+req.params.articleId));
   });
 
   // GET / api / comments /: commentId — возвращает комментарий по id
-  route.get(`/:commentId`, paramValidator(`commentId`, `number`), async (req, res) => {
+  route.get(`/:commentId`, async (req, res) => {
     return res.status(200).json(await service.findOne(+req.params.commentId));
   });
 
@@ -49,15 +47,12 @@ module.exports = async (app, ClassService) => {
   });
 
   // PUT / api / comments /: commentId — обновляет указанный комментарий
-  route.put(`/:commentId`, [
-    paramValidator(`commentId`, `number`),
-    validatorMiddleware(commentSchemaValidator)
-  ], async (req, res) => {
+  route.put(`/:commentId`, validatorMiddleware(commentSchemaValidator), async (req, res) => {
     res.status(200).json(await service.update(+req.params.commentId, req.body));
   });
 
   // DELETE / api / comments /: commentId — удаляет указанный комментарий
-  route.delete(`/:commentId`, paramValidator(`commentId`, `number`), async (req, res) => {
+  route.delete(`/:commentId`, async (req, res) => {
     return res.status(200).json(await service.delete(+req.params.commentId));
   });
 };

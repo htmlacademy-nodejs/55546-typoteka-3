@@ -4,7 +4,6 @@ const router = require(`express`).Router;
 const route = router();
 
 const logger = require(`../../../logger`).getLogger();
-const paramValidator = require(`../../middleware/validator-params`);
 const validatorMiddleware = require(`../../middleware/validator-post`);
 const categorySchemaValidator = require(`../../validators/category`);
 
@@ -30,7 +29,7 @@ module.exports = async (app, ClassService) => {
     res.status(200).json({result: `Создана новая категория`});
   });
 
-  route.get(`/:id`, paramValidator(`id`, `number`), async (req, res) => {
+  route.get(`/:id`, async (req, res) => {
     const {id} = req.params;
     logger.info(`Получение категории: ${id}`);
     res.status(200).json(await service.findOne(id));

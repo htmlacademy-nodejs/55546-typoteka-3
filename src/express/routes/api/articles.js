@@ -5,7 +5,6 @@ const route = router();
 
 const logger = require(`../../../logger`).getLogger();
 const validatorMiddleware = require(`../../middleware/validator-post`);
-const pararmValidator = require(`../../middleware/validator-params`);
 
 const articleSchemaValidator = require(`../../validators/article`);
 
@@ -27,7 +26,7 @@ module.exports = async (app, ClassService) => {
   });
 
   // GET / api / articles /: articleId — возвращает полную информацию о публикации;
-  route.get(`/:articleId`, pararmValidator(`articleId`, `number`), async (req, res) => {
+  route.get(`/:articleId`, async (req, res) => {
     const {articleId} = req.params;
     let article = {};
     try {
@@ -40,17 +39,14 @@ module.exports = async (app, ClassService) => {
     res.json(article);
   });
 
-  route.get(`/page/:page`, pararmValidator(`page`, `number`), async (req, res) => {
+  route.get(`/page/:page`, async (req, res) => {
     res.json({
       articles: (await service.findAllByPage(req.params.page)),
       count: (await service.getCount())
     });
   });
 
-  route.get(`/category/:categoryId/:page`, [
-    pararmValidator(`categoryId`, `number`),
-    pararmValidator(`page`, `number`)
-  ], async (req, res) => {
+  route.get(`/category/:categoryId/:page`, async (req, res) => {
     const {categoryId, page} = req.params;
     res.json({
       articles: (await service.findAllByCategory(categoryId, page)),
@@ -59,7 +55,7 @@ module.exports = async (app, ClassService) => {
   });
 
   // GET / api / articles / user /: userId — возвращает список публикаций созданных указанным пользователем
-  route.get(`/user/:userId`, pararmValidator(`userId`, `number`), async (req, res) => {
+  route.get(`/user/:userId`, async (req, res) => {
     res.json(await service.findAllByUser(req.params.userId));
   });
 
@@ -76,10 +72,7 @@ module.exports = async (app, ClassService) => {
   });
 
   // PUT / api / articles /: articleId — редактирует определённую публикацию;
-  route.put(`/:articleId`, [
-    pararmValidator(`articleId`, `number`),
-    validatorMiddleware(articleSchemaValidator, true)
-  ], async (req, res) => {
+  route.put(`/:articleId`, validatorMiddleware(articleSchemaValidator, true), async (req, res) => {
     try {
       const article = await service.update(req.params.articleId, req.body);
       res.status(200).json(article.dataValues);
