@@ -45,6 +45,8 @@ app.use(expressSession({
 app.use(getUser);
 
 app.use((req, res, next) => {
+  req.socket.emit(`test`, `test data`);
+
   logger.debug(`Маршрут запроса: ${req.url}`);
   next();
 });
