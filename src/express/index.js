@@ -1,7 +1,6 @@
 'use strict';
 
 const path = require(`path`);
-const http = require(`http`);
 const express = require(`express`);
 const appRoutes = require(`./routes`);
 const app = express();
@@ -29,28 +28,6 @@ const categoriesRoute = require(`./routes/categories`);
 
 const getUser = require(`./middleware/get-user`);
 const clientError = require(`./middleware/404`);
-
-const server = http.createServer(app);
-const io = require(`socket.io`)(server);
-
-io.on(`connection`, (socket) => {
-  const {address: ip} = socket.handshake;
-  console.log(`Новое подключение: ${ip}`);
-
-  socket.on(`update-artciles`, () => {
-    socket.broadcast.emit(`update-artciles`, {status: `update-artciles`});
-  });
-
-  socket.on(`update-comments`, () => {
-    socket.broadcast.emit(`update-comments`, {status: `update-comments`});
-  });
-
-  socket.on(`disconnect`, () => {
-    console.log(`Клиент отключён: ${ip}`);
-  });
-
-  socket.send(`[Server]: Добро пожаловать в чат.`);
-});
 
 app.set(`view engine`, `pug`);
 app.set(`views`, path.join(__dirname, `templates`));
