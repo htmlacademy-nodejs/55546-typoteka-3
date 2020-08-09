@@ -29,6 +29,17 @@ const categoriesRoute = require(`./routes/categories`);
 const getUser = require(`./middleware/get-user`);
 const clientError = require(`./middleware/404`);
 
+const socketObject = {
+  clients: []
+};
+
+app.set(`socketObject`, socketObject);
+
+app.use((req, res, next) => {
+  req.socket = socketObject;
+  next();
+});
+
 app.set(`view engine`, `pug`);
 app.set(`views`, path.join(__dirname, `templates`));
 
@@ -45,8 +56,6 @@ app.use(expressSession({
 app.use(getUser);
 
 app.use((req, res, next) => {
-  req.socket.emit(`test`, `test data`);
-
   logger.debug(`Маршрут запроса: ${req.url}`);
   next();
 });

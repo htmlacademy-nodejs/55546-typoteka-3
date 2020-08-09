@@ -181,15 +181,24 @@ route.post(`/:id`, async (req, res) => {
   }
 
   try {
-    await axios.post(getUrlRequest(req, `/api/comments/${id}`),
+    const newComment = await axios.post(getUrlRequest(req, `/api/comments/${id}`),
         JSON.stringify({
           [`author_id`]: +req.session[`user_id`],
           [`article_id`]: +id,
           [`date_create`]: new Date(),
           text: req.body.text,
-        }),
-        {headers: {'Content-Type': `application/json`}});
+        }), {headers: {'Content-Type': `application/json`}});
     logger.info(`Комментарий был успешно создан.`);
+
+    req.socket.clients.forEach((client) => client.emit(`update-comments`, newComment.data));
+
+    let popularArticles = (await axios.get(getUrlRequest(req, `/api/articles/popular`))).data;
+    popularArticles = popularArticles.filter((it) => it.commentsCount > 0);
+
+    logger.info(`Список популярных статей был обновлён.`, popularArticles);
+
+    req.socket.clients.forEach((client) => client.emit(`update-articles`, popularArticles));
+
   } catch (err) {
     if (err.response && err.response.data) {
       errors = err.response.data.message;
