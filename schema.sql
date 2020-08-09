@@ -279,8 +279,8 @@ ALTER TABLE ONLY public.comments
 -- PostgreSQL database dump complete
 --
 
-SELECT setval('public.articles_category_id_seq',1,true)
-SELECT setval('public.articles_id_seq',1,true)
-SELECT setval('public.categories_id_seq',1,true)
-SELECT setval('public.comments_id_seq',1,true)
-SELECT setval('public.users_id_seq',1,true)
+SELECT setval('public.articles_category_id_seq',1,true);
+SELECT setval('public.articles_id_seq',1,true);
+SELECT setval('public.categories_id_seq',1,true);
+SELECT setval('public.comments_id_seq',1,true);
+SELECT setval('public.users_id_seq',1,true);
