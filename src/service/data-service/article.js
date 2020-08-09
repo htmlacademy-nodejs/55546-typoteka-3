@@ -1,6 +1,6 @@
 'use strict';
 
-const {literal, Op} = require(`sequelize`);
+const {literal} = require(`sequelize`);
 const sequelize = require(`../db/sequelize`);
 
 const POPULAR_LIMIT = 4;
@@ -43,6 +43,7 @@ class ArticleService {
       include: [`categories`, `comments`],
       limit: PAGINATION_LIMIT,
       offset: ((page - 1) * PAGINATION_LIMIT),
+      order: [literal(`date_create DESC`)]
     })).map((article) => article.toJSON());
   }
 
@@ -63,6 +64,7 @@ class ArticleService {
       },
       limit: PAGINATION_LIMIT,
       offset: ((page - 1) * PAGINATION_LIMIT),
+      order: [literal(`date_create DESC`)]
     })).map((article) => article.toJSON());
   }
 
@@ -85,14 +87,6 @@ class ArticleService {
           [literal(`(SELECT COUNT(article_id) FROM "comments" WHERE "comments"."article_id" = "Article"."id")`), `commentsCount`],
         ]
       },
-      // where: {
-      //   commentsCount: {
-      //     [Op.gt]: 0
-      //   }
-      // },
-      // where: [
-      //   literal(`"commentsCount" > 0`)
-      // ],
       limit: POPULAR_LIMIT,
       order: [literal(`"commentsCount" DESC`)]
     })).map((article) => article.toJSON());
