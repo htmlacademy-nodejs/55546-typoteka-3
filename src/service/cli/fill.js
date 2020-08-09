@@ -45,6 +45,7 @@ module.exports = {
     });
 
     generator.createUser({
+      id: 2,
       name: `Rob`,
       surname: `Robertov`,
       email: `rob@mail.ru`,

@@ -78,6 +78,10 @@ module.exports = class GeneratorHelper {
       `\t(${it})${(idx + 1 !== arr.length ? `,` : `;`)}\r`).join(``)}\r\r`;
   }
 
+  createStringSetval(name, index) {
+    return `SELECT setval('${name}', ${index}, true);\r\r\r`;
+  }
+
   generateSql() {
     const {categories, users, articles, arcticlesCategory, comments} = this;
     let result = ``;
@@ -85,12 +89,16 @@ module.exports = class GeneratorHelper {
     result += this.createStringSql(`users`, [`id`, `name`, `surname`, `email`, `password`, `avatar`],
         users.map(({id, name, surname, email, password, avatar}) =>
           [id, `'${name}'`, `'${surname}'`, `'${email}'`, `'${password}'`, `'${avatar}'`]));
+    result += this.createStringSetval(`public.users_id_seq`, users[users.length - 1].id);
 
     result += this.createStringSql(`categories`, [`id`, `title`],
         categories.map(({id, title}) => [id, `'${title}'`]));
+    result += this.createStringSetval(`public.categories_id_seq`, categories[categories.length - 1].id);
+
     result += this.createStringSql(`articles`, [`id`, `author_id`, `title`, `announce`, `full_text`, `date_create`],
         articles.map((it) =>
           [it.id, it[`author_id`], `'${it.title}'`, `'${it.announce}'`, `'${it[`full_text`]}'`, `'${it[`date_create`]}'`]));
+    result += this.createStringSetval(`public.articles_id_seq`, articles[articles.length - 1].id);
 
     result += this.createStringSql(`articles_category`, [`id`, `article_id`, `category_id`],
         arcticlesCategory.map((it) => [it.id, it[`article_id`], it[`category_id`]]));
