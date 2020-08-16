@@ -1,9 +1,10 @@
+
 (() => {
+  const MAX_COUNT_ITEMS = 4;
+
   const artcilesContainer = document.querySelector(`.hot__list`);
   const commentsContainer = document.querySelector(`.last__list`);
-  const socket = io('http://localhost:3000');
-
-  const MAX_COUNT_ITEMS = 4;
+  const socket = io(window.location.origin);
 
   const createElement = (html) => {
     const element = document.createElement(`div`);
@@ -27,7 +28,9 @@
     const items = [createElement(`<li class="last__list-item">
       <img class="last__list-image" src="/upload/users/${author.avatar}" width="20" height="20" alt="Аватар пользователя">
       <b class="last__list-name">${author.name} ${author.surname}</b>
-      <a class="last__list-link" href="/articles/${article.id}">${text}</a>
+      <a class="last__list-link" href="/articles/${article.id}">
+        ${text.length <= 100 ? text : `${text.slice(0, 100)}...`}}
+      </a>
     </li>`), ...commentsContainer.querySelectorAll(`.last__list-item`)]
       .splice(0, MAX_COUNT_ITEMS);
 

@@ -1,12 +1,11 @@
 'use strict';
 
 const router = require(`express`).Router;
-const route = router();
-
 const logger = require(`../../../logger`).getLogger();
 const validatorMiddleware = require(`../../middleware/validator-post`);
-
 const articleSchemaValidator = require(`../../validators/article`);
+
+const route = router();
 
 module.exports = async (app, ClassService) => {
   logger.info(`Подключение articles api`);
@@ -28,15 +27,12 @@ module.exports = async (app, ClassService) => {
   // GET / api / articles /: articleId — возвращает полную информацию о публикации;
   route.get(`/:articleId`, async (req, res) => {
     const {articleId} = req.params;
-    let article = {};
     try {
-      article = await service.findOne(articleId);
+      res.json(await service.findOne(articleId));
     } catch (err) {
       res.sendStatus(404);
       logger.error(`Ошибка при получении статьи: ${articleId}`);
     }
-
-    res.json(article);
   });
 
   route.get(`/page/:page`, async (req, res) => {
@@ -52,11 +48,6 @@ module.exports = async (app, ClassService) => {
       articles: (await service.findAllByCategory(categoryId, page)),
       count: (await service.getCountByCategory(categoryId))
     });
-  });
-
-  // GET / api / articles / user /: userId — возвращает список публикаций созданных указанным пользователем
-  route.get(`/user/:userId`, async (req, res) => {
-    res.json(await service.findAllByUser(req.params.userId));
   });
 
   // POST / api / articles — создаёт новую публикацию;

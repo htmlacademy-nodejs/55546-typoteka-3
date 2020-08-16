@@ -3,14 +3,14 @@
 const bcrypt = require(`bcrypt`);
 const logger = require(`../../../logger`).getLogger();
 const router = require(`express`).Router;
-const route = router();
-const {PASSWORD_SALT} = require(`../../../const`);
-
 const validatorMiddleware = require(`../../middleware/validator-post`);
 const {
   register: registerSchemaValidator,
   login: loginSchemaValidator,
 } = require(`../../validators/user`);
+const {PASSWORD_SALT} = require(`../../../const`);
+
+const route = router();
 
 module.exports = async (app, ClassService) => {
   logger.info(`Подключение user api`);

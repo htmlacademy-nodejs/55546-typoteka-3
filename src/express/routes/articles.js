@@ -4,14 +4,14 @@ const moment = require(`moment`);
 const path = require(`path`);
 const axios = require(`axios`);
 const router = require(`express`).Router;
-const route = router();
 const {getUrlRequest, pagination} = require(`../../utils`);
 const logger = require(`../../logger`).getLogger();
 const multer = require(`multer`);
-const {PAGINATION_LIMIT, UPLOADED_PATH, ADMIN_ID} = require(`../../const`);
 const authenticate = require(`../middleware/authenticate`);
 const {unlink} = require(`fs`).promises;
+const {PAGINATION_LIMIT, UPLOADED_PATH, ADMIN_ID} = require(`../../const`);
 
+const route = router();
 const multerStorage = multer.diskStorage({
   destination(req, file, cb) {
     cb(null, `${UPLOADED_PATH}/articles/`);
@@ -150,8 +150,6 @@ route.post(`/add`, authenticate, multer({storage: multerStorage}).single(`img`),
 
 route.get(`/:id`, async (req, res) => {
   let article = {};
-  let errors = null;
-
   try {
     article = (await axios.get(getUrlRequest(req, `/api/articles/${req.params.id}`))).data;
     article[`date_create`] = moment(article[`date_create`]).format(`DD.MM.YYYY hh:mm`);
@@ -160,9 +158,11 @@ route.get(`/:id`, async (req, res) => {
     });
   } catch (err) {
     logger.error(`Ошибка при получении статьи: ${err}`);
+    res.redirect(`/client-error`);
+    return;
   }
 
-  res.render(`article`, {article, errors, refLink: req.headers.referer});
+  res.render(`article`, {article, errors: null, refLink: req.headers.referer});
 });
 
 route.post(`/:id`, async (req, res) => {
@@ -178,6 +178,8 @@ route.post(`/:id`, async (req, res) => {
     });
   } catch (err) {
     logger.error(`Ошибка при получении статьи: ${err}`);
+    res.redirect(`/client-error`);
+    return;
   }
 
   try {
@@ -199,6 +201,8 @@ route.post(`/:id`, async (req, res) => {
 
     req.socket.clients.forEach((client) => client.emit(`update-articles`, popularArticles));
 
+    res.redirect(`/articles/${id}`);
+    return;
   } catch (err) {
     if (err.response && err.response.data) {
       errors = err.response.data.message;
@@ -216,6 +220,7 @@ route.get(`/edit/:id`, authenticate, async (req, res) => {
     article = (await axios.get(getUrlRequest(req, `/api/articles/${req.params.id}`))).data;
   } catch (err) {
     logger.error(`Ошибка при получении статьи`);
+    res.redirect(`/client-error`);
     return;
   }
 
@@ -241,7 +246,9 @@ route.post(`/edit/:id`, [
   try {
     article = (await axios.get(getUrlRequest(req, `/api/articles/${params.id}`))).data;
   } catch (err) {
-    logger.error(`Ошибка при получении публикации`);
+    logger.error(`Ошибка при получении статьи`);
+    res.redirect(`/client-error`);
+    return;
   }
 
   if (file) {

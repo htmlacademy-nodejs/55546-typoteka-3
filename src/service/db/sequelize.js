@@ -1,8 +1,8 @@
 'use strict';
 
 const config = require(`../../config`);
-
 const {Sequelize} = require(`sequelize`);
+
 const sequelize = new Sequelize(
     config.DB_PGDATABASE,
     config.DB_PGUSER,

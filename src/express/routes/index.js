@@ -2,15 +2,14 @@
 
 const moment = require(`moment`);
 const axios = require(`axios`);
-
 const {getUrlRequest, pagination} = require(`../../utils`);
-const router = require(`express`).Router;
-const appRouter = router();
-
+const express = require(`express`);
 const logger = require(`../../logger`).getLogger();
-
-const {PAGINATION_LIMIT} = require(`../../const`);
 const authenticate = require(`../middleware/authenticate`);
+const {PAGINATION_LIMIT} = require(`../../const`);
+
+const router = express.Router;
+const appRouter = router();
 
 appRouter.get(`/`, async (req, res) => {
   logger.info(`Главная страница`);
@@ -61,7 +60,7 @@ appRouter.get(`/my`, authenticate, async (req, res) => {
   logger.info(`Персональные публикации`);
   let articles = [];
   try {
-    articles = (await axios.get(getUrlRequest(req, `/api/articles/user/${res.locals.user.id}`))).data;
+    articles = (await axios.get(getUrlRequest(req, `/api/articles`))).data;
     articles.forEach((article) => {
       article[`date_create`] = moment(article[`date_create`]).format(`DD.MM.YYYY hh:mm`);
     });

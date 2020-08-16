@@ -1,8 +1,7 @@
 'use strict';
+
 const fs = require(`fs`).promises;
-
 const GeneratorHelper = require(`../../generator-helper`);
-
 const chalk = require(`chalk`);
 const {getArticleData} = require(`../../utils`);
 const bcrypt = require(`bcrypt`);
@@ -10,24 +9,22 @@ const {PASSWORD_SALT, ADMIN_ID} = require(`../../const`);
 
 const EXIT_CODE_ERROR = 1;
 const DEFAULT_ARTICLE_COUNT = 3;
-
+const MAX_ARTICLES_COUNT = 1000;
 const FILE_NAME = `fill-db.sql`;
 const MAX_SENTENCES_COUNT = 4;
 const MAX_COMMENTS_TEXT_COUNT = 5;
-
 const MAX_ANNOUNCE_COUNT = 4;
+const DEFAULT_USER_PASSWORD = `123456`;
 
 const CommentsCount = {
   min: 2,
   max: 10,
 };
 
-const DEFAULT_USER_PASSWORD = `123456`;
-
 module.exports = {
   name: `--fill`,
   async run(count) {
-    if (count > 1000) {
+    if (count > MAX_ARTICLES_COUNT) {
       console.error(chalk.red(`Не больше 1000 объявлений`));
       process.exit(EXIT_CODE_ERROR);
     }

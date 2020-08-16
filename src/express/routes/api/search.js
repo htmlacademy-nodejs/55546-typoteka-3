@@ -1,9 +1,9 @@
 'use strict';
 
 const router = require(`express`).Router;
-const route = router();
-
 const logger = require(`../../../logger`).getLogger();
+
+const route = router();
 
 module.exports = async (app, ClassService) => {
   logger.info(`Подключение search api`);

@@ -7,13 +7,7 @@ const socketServer = require(`../../socket-server`);
 
 const DEFAULT_PORT = 8080;
 
-const getPort = () => {
-  if (process.env.PORT) {
-    return +(process.env.PORT.trim());
-  }
-
-  return +(config.PORT || DEFAULT_PORT);
-};
+const getPort = () => +(process.env.PORT ? process.env.PORT.trim() : (config.PORT || DEFAULT_PORT));
 
 module.exports = {
   name: `--server`,

@@ -2,10 +2,9 @@
 
 const {literal} = require(`sequelize`);
 const sequelize = require(`../db/sequelize`);
+const {PAGINATION_LIMIT} = require(`../../const`);
 
 const POPULAR_LIMIT = 4;
-
-const {PAGINATION_LIMIT} = require(`../../const`);
 
 class ArticleService {
   async findOne(id) {
@@ -71,12 +70,6 @@ class ArticleService {
   async getCountByCategory(categoryId) {
     return await (await sequelize()).models.ArticleCategory
       .count({where: {'category_id': categoryId}});
-  }
-
-  async findAllByUser(userId) {
-    const {Article} = (await sequelize()).models;
-    return (await Article.findAll({where: {'author_id': userId}, order: [[`date_create`, `DESC`]]}))
-      .map((offer) => offer.toJSON());
   }
 
   async findPopular() {

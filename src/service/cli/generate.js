@@ -11,11 +11,13 @@ const FILE_NAME = `mock.json`;
 const MAX_ANNOUNCE_COUNT = 4;
 const MAX_COMMENTS_COUNT = 10;
 const MAX_COMMENTS_TEXT_COUNT = 5;
+const MAX_ARTICLES_COUNT = 1000;
+const MONTH_RANGE = 3;
 
 module.exports = {
   name: `--generate`,
   async run(count) {
-    if (count > 1000) {
+    if (count > MAX_ARTICLES_COUNT) {
       console.error(chalk.green(`Не больше 1000 объявлений`));
       process.exit(EXIT_CODE_ERROR);
     }
@@ -23,7 +25,7 @@ module.exports = {
     const {titles, sentences, categories, comments} = await getArticleData();
 
     const baseDatetime = new Date();
-    baseDatetime.setMonth(-3);
+    baseDatetime.setMonth(-MONTH_RANGE);
 
     const mockData = Array.from({length: +(count || DEFAULT_COUNT)}, () => ({
       id: nanoid(),

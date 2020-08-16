@@ -1,13 +1,11 @@
 'use strict';
 
-// const fs = require(`fs`).promises;
 const router = require(`express`).Router;
-const route = router();
-
 const logger = require(`../../../logger`).getLogger();
-
 const validatorMiddleware = require(`../../middleware/validator-post`);
 const commentSchemaValidator = require(`../../validators/comment`);
+
+const route = router();
 
 module.exports = async (app, ClassService) => {
   logger.info(`Подключение comments api`);
@@ -26,25 +24,10 @@ module.exports = async (app, ClassService) => {
     return res.status(200).json(await service.findLast());
   });
 
-  // GET / api / comments /: articleId / all — возвращает список комментариев конкретного предложения
-  route.get(`/:articleId/all`, async (req, res) => {
-    return res.status(200).json(await service.findAllByArticleId(+req.params.articleId));
-  });
-
-  // GET / api / comments /: commentId — возвращает комментарий по id
-  route.get(`/:commentId`, async (req, res) => {
-    return res.status(200).json(await service.findOne(+req.params.commentId));
-  });
-
   // POST / api / comments /: articleId — создаёт новый комментарий
   route.post(`/:articleId`, validatorMiddleware(commentSchemaValidator), async (req, res) => {
     const result = await service.create(req.body);
     return res.status(200).json(await service.findOne(result.id));
-  });
-
-  // PUT / api / comments /: commentId — обновляет указанный комментарий
-  route.put(`/:commentId`, validatorMiddleware(commentSchemaValidator), async (req, res) => {
-    res.status(200).json(await service.update(+req.params.commentId, req.body));
   });
 
   // DELETE / api / comments /: commentId — удаляет указанный комментарий

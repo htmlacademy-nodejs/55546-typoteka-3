@@ -1,7 +1,7 @@
 'use strict';
 
 const http = require(`http`);
-let io = require(`socket.io`);
+const io = require(`socket.io`);
 const logger = require(`./logger`).getLogger();
 
 module.exports = (app) => {
@@ -23,8 +23,6 @@ module.exports = (app) => {
 
       console.log(`Клиент отключён: ${ip}`);
     });
-
-    socket.send(`[Server]: Добро пожаловать в чат.`);
   });
 
   return server;

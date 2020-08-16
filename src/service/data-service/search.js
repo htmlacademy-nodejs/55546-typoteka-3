@@ -1,7 +1,7 @@
 'use strict';
 
-const {Op, literal} = require(`sequelize`);
 const sequelize = require(`../db/sequelize`);
+const {Op, literal} = require(`sequelize`);
 
 class SearchService {
   async search(title) {

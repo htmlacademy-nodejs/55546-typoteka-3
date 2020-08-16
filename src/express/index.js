@@ -3,10 +3,8 @@
 const path = require(`path`);
 const express = require(`express`);
 const appRoutes = require(`./routes`);
-const app = express();
 
 const logger = require(`../logger`).getLogger();
-const STATIC_DIR = path.join(__dirname, `public`);
 
 const apiArticles = require(`./routes/api/articles`);
 const apiCategories = require(`./routes/api/categories`);
@@ -28,6 +26,9 @@ const categoriesRoute = require(`./routes/categories`);
 
 const getUser = require(`./middleware/get-user`);
 const clientError = require(`./middleware/404`);
+
+const STATIC_DIR = path.join(__dirname, `public`);
+const app = express();
 
 const socketObject = {
   clients: []

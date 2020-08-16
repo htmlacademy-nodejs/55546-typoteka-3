@@ -3,7 +3,6 @@
 const path = require(`path`);
 const axios = require(`axios`);
 const router = require(`express`).Router;
-const route = router();
 const {getUrlRequest} = require(`../../utils`);
 const logger = require(`../../logger`).getLogger();
 const csrf = require(`csurf`);
@@ -12,6 +11,7 @@ const multer = require(`multer`);
 const authenticate = require(`../middleware/authenticate`);
 const {UPLOADED_PATH} = require(`../../const`);
 
+const route = router();
 const multerStorage = multer.diskStorage({
   destination(req, file, cb) {
     cb(null, `${UPLOADED_PATH}/users/`);
@@ -35,7 +35,6 @@ route.post(`/comment-delete/:id`, authenticate, async (req, res) => {
 });
 
 route.get(`/register`, csrfMiddleware, (req, res) => {
-
   res.render(`registration`, {
     errors: null,
     data: {},
@@ -61,7 +60,7 @@ route.post(`/register`, [multer({storage: multerStorage}).single(`avatar`), csrf
     try {
       await unlink(`${UPLOADED_PATH}/users/${body.avatar}`);
     } catch (fileErr) {
-      logger.info(`Файл к статье не был удалён: ${fileErr}`);
+      logger.info(`Ошибка при очистке файла с аватаром пользователя: ${fileErr}`);
     }
 
     if (err.response && err.response.data) {

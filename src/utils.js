@@ -13,7 +13,7 @@ const shuffle = (someArray) => {
   return someArray;
 };
 
-const getUrlRequest = (req, path) => new URL(path, `http://${(`` + req.headers.host)}`).href;
+const getUrlRequest = (req, path) => new URL(path, `http://${req.headers.host}`).href;
 
 const getDataByFile = async (path) => (await fs.readFile(path)).toString().trim().split(`\n`);
 
@@ -31,8 +31,8 @@ const pagination = (total, limit, activePage) => {
     isActive: countPage > 1,
     next: {status: activePage >= 1 && activePage < countPage, page: +activePage + 1},
     prev: {status: activePage > 1 && activePage <= countPage, page: +activePage - 1},
-    pages: Array.from({length: countPage})
-      .map((_it, idx) => ({page: idx + 1, isActive: +activePage === (idx + 1)}))
+    pages: Array.from({length: countPage},
+        (_it, idx) => ({page: idx + 1, isActive: +activePage === (idx + 1)}))
   };
 };
 

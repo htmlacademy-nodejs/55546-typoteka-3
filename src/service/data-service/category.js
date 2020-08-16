@@ -44,11 +44,6 @@ class CategoryService {
         (categoryId) => ({'article_id': +articleId, 'category_id': +categoryId})));
   }
 
-  async deleteByArticle(articleId) {
-    const {ArticleCategory} = (await sequelize()).models;
-    await ArticleCategory.destroy({where: {'article_id': +articleId}});
-  }
-
   async checkIsAddedCategories(categoryId) {
     const {ArticleCategory} = (await sequelize()).models;
     const article = await ArticleCategory.findOne({where: {'category_id': +categoryId}});

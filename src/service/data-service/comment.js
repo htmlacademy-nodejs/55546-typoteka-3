@@ -19,12 +19,6 @@ class CommentService {
     })).map((comment) => comment.toJSON());
   }
 
-  async findAllByArticleId(id) {
-    const {Comment} = (await sequelize()).models;
-    return (await Comment.findAll({where: {'article_id': +id}}))
-      .map((comment) => comment.toJSON());
-  }
-
   async findLast() {
     const {Comment} = (await sequelize()).models;
     return (await Comment.findAll({
@@ -34,24 +28,9 @@ class CommentService {
     })).map((comment) => comment.toJSON());
   }
 
-  async checkIsAuthor(commentId, userId) {
-    const {Comment} = (await sequelize()).models;
-    return (await Comment.findOne({
-      where: {
-        [`id`]: commentId,
-        [`author_id`]: userId,
-      },
-    })) ? true : false;
-  }
-
   async create(data) {
     const {Comment} = (await sequelize()).models;
     return await Comment.create(data);
-  }
-
-  async update(id, data) {
-    const {Comment} = (await sequelize()).models;
-    return await Comment.update(data, {where: {id}});
   }
 
   async delete(id) {

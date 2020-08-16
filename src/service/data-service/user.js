@@ -16,7 +16,7 @@ class SearchService {
 
   async checkEmail(email) {
     const {User} = (await sequelize()).models;
-    return (await User.findOne({where: {email}})) === null;
+    return !!(await User.findOne({where: {email}}));
   }
 
   async authorization(email, password) {
