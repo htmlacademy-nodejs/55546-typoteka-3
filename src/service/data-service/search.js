@@ -4,7 +4,7 @@ const sequelize = require(`../db/sequelize`);
 const {Op, literal} = require(`sequelize`);
 
 class SearchService {
-  async search(title) {
+  static async getSearch(title) {
     const {Article} = (await sequelize()).models;
     return await Article.findAll({
       raw: true,

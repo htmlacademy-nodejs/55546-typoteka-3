@@ -14,83 +14,83 @@ const mock = {
 
 describe(`Проверка валидации статьи`, () => {
   test(`Корректна валидация`, async () => {
-    let res = null;
+    let result = null;
     try {
-      res = await schema.validateAsync(mock);
+      result = await schema.validateAsync(mock);
     } catch (err) {
       //
     }
 
-    expect(res).toStrictEqual(mock);
+    expect(result).toStrictEqual(mock);
   });
 
   test(`Валидация с недостаточной длинной заголовка`, async () => {
-    let res = null;
+    let result = null;
 
     mock.title = ``;
 
     try {
-      res = await schema.validateAsync(mock);
+      result = await schema.validateAsync(mock);
     } catch (err) {
       //
     }
 
-    expect(res).toEqual(null);
+    expect(result).toEqual(null);
   });
 
   test(`Валидация с некорректным типом изображения`, async () => {
-    let res = null;
+    let result = null;
 
     mock.img = 123;
 
     try {
-      res = await schema.validateAsync(mock);
+      result = await schema.validateAsync(mock);
     } catch (err) {
       //
     }
 
-    expect(res).toEqual(null);
+    expect(result).toEqual(null);
   });
 
   test(`Валидация с некорректным списком категорий`, async () => {
-    let res = null;
+    let result = null;
 
     mock.categories = [`1`, null, false];
 
     try {
-      res = await schema.validateAsync(mock);
+      result = await schema.validateAsync(mock);
     } catch (err) {
       //
     }
 
-    expect(res).toEqual(null);
+    expect(result).toEqual(null);
   });
 
   test(`Валидация с некорректным значением идентификатора автора`, async () => {
-    let res = null;
+    let result = null;
 
     mock[`author_id`] = `1`;
 
     try {
-      res = await schema.validateAsync(mock);
+      result = await schema.validateAsync(mock);
     } catch (err) {
       //
     }
 
-    expect(res).toEqual(null);
+    expect(result).toEqual(null);
   });
 
   test(`Валидация с не корректной датой`, async () => {
-    let res = null;
+    let result = null;
 
     mock[`date_create`] = `Дата`;
 
     try {
-      res = await schema.validateAsync(mock);
+      result = await schema.validateAsync(mock);
     } catch (err) {
       //
     }
 
-    expect(res).toEqual(null);
+    expect(result).toEqual(null);
   });
 });

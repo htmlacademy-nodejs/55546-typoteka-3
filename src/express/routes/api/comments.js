@@ -7,10 +7,8 @@ const commentSchemaValidator = require(`../../validators/comment`);
 
 const route = router();
 
-module.exports = async (app, ClassService) => {
+module.exports = async (app, service) => {
   logger.info(`Подключение comments api`);
-
-  const service = new ClassService();
 
   app.use(`/api/comments`, route);
 

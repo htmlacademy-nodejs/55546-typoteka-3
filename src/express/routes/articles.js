@@ -1,32 +1,26 @@
 'use strict';
 
-const moment = require(`moment`);
-const path = require(`path`);
-const axios = require(`axios`);
 const router = require(`express`).Router;
-const {getUrlRequest, pagination} = require(`../../utils`);
+const {createPagination, createMulterStorage, getCorrectDateFormat, setCorrectDate} = require(`../../utils`);
 const logger = require(`../../logger`).getLogger();
 const multer = require(`multer`);
 const authenticate = require(`../middleware/authenticate`);
 const {unlink} = require(`fs`).promises;
 const {PAGINATION_LIMIT, UPLOADED_PATH, ADMIN_ID} = require(`../../const`);
 
+const FIRST_PAGE = 1;
+const DEFAULT_ARTICLES_COUNT = 0;
+const MIN_ARTICLE_COMMENT_COUNT = 0;
+
 const route = router();
-const multerStorage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, `${UPLOADED_PATH}/articles/`);
-  },
-  filename(req, file, cb) {
-    cb(null, `${+(Date.now())}${path.extname(file.originalname)}`);
-  }
-});
+const multerStorage = multer.diskStorage(createMulterStorage(`${UPLOADED_PATH}/articles/`));
 
 const getCorrectDate = (date) => date ? new Date(date.split(`.`).reverse().join(`.`)) : new Date();
 
 route.post(`/delete/:id`, authenticate, async (req, res) => {
   let articleImg = null;
   try {
-    const article = (await axios.get(getUrlRequest(req, `/api/articles/${req.params.id}`))).data;
+    const article = (await req.axios.get(`/api/articles/${req.params.id}`)).data;
     articleImg = article.img;
   } catch (err) {
     logger.error(`Ошибка при получении статьи: ${err}`);
@@ -35,7 +29,7 @@ route.post(`/delete/:id`, authenticate, async (req, res) => {
   }
 
   try {
-    await axios.delete(getUrlRequest(req, `/api/articles/${req.params.id}`));
+    await req.axios.delete(`/api/articles/${req.params.id}`);
   } catch (err) {
     logger.error(`Ошибка при удалении статьи: ${err}`);
   }
@@ -55,22 +49,22 @@ route.get(`/category/:categoryId`, async (req, res) => {
   const {categoryId} = req.params;
   let currentCategory = null;
   try {
-    currentCategory = (await axios.get(getUrlRequest(req, `/api/categories/${categoryId}`))).data;
+    currentCategory = (await req.axios.get(`/api/categories/${categoryId}`)).data;
   } catch (err) {
     logger.info(`Ошибка при получении категорий: ${categoryId}: ${err}`);
   }
 
   let categories = [];
   try {
-    categories = (await axios.get(getUrlRequest(req, `/api/categories`))).data;
+    categories = (await req.axios.get(`/api/categories`)).data;
   } catch (err) {
     logger.error(`Ошибка при получении списка категорий`);
   }
 
-  const currentPage = +(req.query.page || 1);
-  let articlesData = {articles: [], count: 0};
+  const currentPage = +(req.query.page || FIRST_PAGE);
+  let data = {articles: [], count: DEFAULT_ARTICLES_COUNT};
   try {
-    articlesData = (await axios.get(getUrlRequest(req, `/api/articles/category/${categoryId}/${currentPage}`))).data;
+    data = (await req.axios.get(`/api/articles/category/${categoryId}/${currentPage}`)).data;
   } catch (err) {
     logger.info(`Ошибка при получении публикаций: ${err}`);
   }
@@ -78,8 +72,8 @@ route.get(`/category/:categoryId`, async (req, res) => {
   res.render(`articles-by-category`, {
     currentCategory,
     categories,
-    articles: articlesData.articles,
-    pagination: pagination(articlesData.count, PAGINATION_LIMIT, currentPage)
+    articles: data.articles,
+    pagination: createPagination(data.count, PAGINATION_LIMIT, currentPage)
   });
 });
 
@@ -88,7 +82,7 @@ route.get(`/add`, authenticate, async (req, res) => {
 
   let categories = [];
   try {
-    categories = (await axios.get(getUrlRequest(req, `/api/categories`))).data;
+    categories = (await req.axios.get(`/api/categories`)).data;
   } catch (err) {
     logger.error(`Ошибка при получении списка категорий`);
   }
@@ -107,34 +101,36 @@ route.post(`/add`, authenticate, multer({storage: multerStorage}).single(`img`),
 
   let categories = [];
   try {
-    categories = (await axios.get(getUrlRequest(req, `/api/categories`))).data;
+    categories = (await req.axios.get(`/api/categories`)).data;
   } catch (err) {
     logger.error(`Ошибка при получении списка категорий`);
   }
 
   try {
-    const article = await axios.post(getUrlRequest(req, `/api/articles`), JSON.stringify({
+    const article = await req.axios.post(`/api/articles`, JSON.stringify({
       'title': body[`title`],
       'img': body[`img`],
       'announce': body[`announce`],
       'full_text': body[`full_text`],
-      'date_create': moment(getCorrectDate(body[`date_create`])).format(`DD.MM.YYYY hh:mm`),
+      'date_create': getCorrectDate(body[`date_create`]),
       'categories': body[`categories`],
       'author_id': ADMIN_ID,
     }), {headers: {'Content-Type': `application/json`}});
 
-    await axios.post(getUrlRequest(req, `/api/categories/set-article-categories`),
+    await req.axios.post(`/api/categories/set-article-categories`,
         JSON.stringify({articleId: article.data.id, categories: body.categories}),
         {headers: {'Content-Type': `application/json`}}).data;
 
-    logger.info(`Создано новое предложение ${article.data.id}`);
+    logger.info(`Создана новая статья ${article.data.id}`);
     res.redirect(`/my`);
     return;
   } catch (err) {
-    try {
-      await unlink(`${UPLOADED_PATH}/articles/${body.img}`);
-    } catch (fileErr) {
-      logger.info(`Файл к статье не был удалён: ${fileErr}`);
+    if (body.img) {
+      try {
+        await unlink(`${UPLOADED_PATH}/articles/${body.img}`);
+      } catch (fileErr) {
+        logger.info(`Файл к статье не был удалён: ${fileErr}`);
+      }
     }
 
     if (err.response && err.response.data) {
@@ -151,11 +147,9 @@ route.post(`/add`, authenticate, multer({storage: multerStorage}).single(`img`),
 route.get(`/:id`, async (req, res) => {
   let article = {};
   try {
-    article = (await axios.get(getUrlRequest(req, `/api/articles/${req.params.id}`))).data;
-    article[`date_create`] = moment(article[`date_create`]).format(`DD.MM.YYYY hh:mm`);
-    article.comments.forEach((comment) => {
-      comment[`date_create`] = moment(comment[`date_create`]).format(`DD.MM.YYYY hh:mm`);
-    });
+    article = (await req.axios.get(`/api/articles/${req.params.id}`)).data;
+    article[`date_create`] = getCorrectDateFormat(article[`date_create`]);
+    article.comments = setCorrectDate(article.comments);
   } catch (err) {
     logger.error(`Ошибка при получении статьи: ${err}`);
     res.redirect(`/client-error`);
@@ -171,11 +165,9 @@ route.post(`/:id`, async (req, res) => {
   let errors = null;
 
   try {
-    article = (await axios.get(getUrlRequest(req, `/api/articles/${req.params.id}`))).data;
-    article[`date_create`] = moment(article[`date_create`]).format(`DD.MM.YYYY hh:mm`);
-    article.comments.forEach((comment) => {
-      comment[`date_create`] = moment(comment[`date_create`]).format(`DD.MM.YYYY hh:mm`);
-    });
+    article = (await req.axios.get(`/api/articles/${req.params.id}`)).data;
+    article[`date_create`] = getCorrectDateFormat(article[`date_create`]);
+    article.comments = setCorrectDate(article.comments);
   } catch (err) {
     logger.error(`Ошибка при получении статьи: ${err}`);
     res.redirect(`/client-error`);
@@ -183,7 +175,7 @@ route.post(`/:id`, async (req, res) => {
   }
 
   try {
-    const newComment = await axios.post(getUrlRequest(req, `/api/comments/${id}`),
+    const createdComment = await req.axios.post(`/api/comments/${id}`,
         JSON.stringify({
           [`author_id`]: +req.session[`user_id`],
           [`article_id`]: +id,
@@ -192,10 +184,10 @@ route.post(`/:id`, async (req, res) => {
         }), {headers: {'Content-Type': `application/json`}});
     logger.info(`Комментарий был успешно создан.`);
 
-    req.socket.clients.forEach((client) => client.emit(`update-comments`, newComment.data));
+    req.socket.clients.forEach((client) => client.emit(`update-comments`, createdComment.data));
 
-    let popularArticles = (await axios.get(getUrlRequest(req, `/api/articles/popular`))).data;
-    popularArticles = popularArticles.filter((it) => it.commentsCount > 0);
+    let popularArticles = (await req.axios.get(`/api/articles/popular`)).data;
+    popularArticles = popularArticles.filter((it) => it.commentsCount > MIN_ARTICLE_COMMENT_COUNT);
 
     logger.info(`Список популярных статей был обновлён.`, popularArticles);
 
@@ -217,7 +209,7 @@ route.post(`/:id`, async (req, res) => {
 route.get(`/edit/:id`, authenticate, async (req, res) => {
   let article = {};
   try {
-    article = (await axios.get(getUrlRequest(req, `/api/articles/${req.params.id}`))).data;
+    article = (await req.axios.get(`/api/articles/${req.params.id}`)).data;
   } catch (err) {
     logger.error(`Ошибка при получении статьи`);
     res.redirect(`/client-error`);
@@ -226,7 +218,7 @@ route.get(`/edit/:id`, authenticate, async (req, res) => {
 
   let categories = [];
   try {
-    categories = (await axios.get(getUrlRequest(req, `/api/categories`))).data;
+    categories = (await req.axios.get(`/api/categories`)).data;
   } catch (err) {
     logger.error(`Ошибка при получении предложения`);
   }
@@ -244,7 +236,7 @@ route.post(`/edit/:id`, [
 
   let article = {};
   try {
-    article = (await axios.get(getUrlRequest(req, `/api/articles/${params.id}`))).data;
+    article = (await req.axios.get(`/api/articles/${params.id}`)).data;
   } catch (err) {
     logger.error(`Ошибка при получении статьи`);
     res.redirect(`/client-error`);
@@ -257,18 +249,18 @@ route.post(`/edit/:id`, [
 
   let categories = [];
   try {
-    categories = (await axios.get(getUrlRequest(req, `/api/categories`))).data;
+    categories = (await req.axios.get(`/api/categories`)).data;
   } catch (err) {
     logger.error(`Ошибка при получении списка категорий`);
   }
 
   try {
-    body[`date_create`] = moment(getCorrectDate(body[`date_create`])).format(`DD.MM.YYYY hh:mm`);
+    body[`date_create`] = getCorrectDateFormat(body[`date_create`]);
     body[`author_id`] = article[`author_id`];
-    await axios.put(getUrlRequest(req, `/api/articles/${params.id}`), JSON.stringify(body),
+    await req.axios.put(`/api/articles/${params.id}`, JSON.stringify(body),
         {headers: {'Content-Type': `application/json`}});
 
-    await axios.post(getUrlRequest(req, `/api/categories/set-article-categories`),
+    await req.axios.post(`/api/categories/set-article-categories`,
         JSON.stringify({articleId: params.id, categories: body.categories}),
         {headers: {'Content-Type': `application/json`}}).data;
 
@@ -276,10 +268,12 @@ route.post(`/edit/:id`, [
     res.redirect(`/my`);
     return;
   } catch (err) {
-    try {
-      await unlink(`${UPLOADED_PATH}/articles/${body.img}`);
-    } catch (fileErr) {
-      logger.info(`Файл к статье не был удалён: ${fileErr}`);
+    if (body.img) {
+      try {
+        await unlink(`${UPLOADED_PATH}/articles/${body.img}`);
+      } catch (fileErr) {
+        logger.info(`Файл к статье не был удалён: ${fileErr}`);
+      }
     }
 
     if (err.response && err.response.data) {

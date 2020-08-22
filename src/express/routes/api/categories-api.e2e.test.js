@@ -5,7 +5,7 @@ const server = require(`../../index`);
 
 describe(`Проверка REST API для работы с категориями`, () => {
   test(`Получение всех категорий`, async () => {
-    const res = await request(server).get(`/api/categories`);
-    expect(res.statusCode).toBe(200);
+    const result = await request(server).get(`/api/categories`);
+    expect(result.statusCode).toBe(200);
   });
 });

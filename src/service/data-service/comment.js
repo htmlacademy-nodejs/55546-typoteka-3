@@ -6,12 +6,12 @@ const sequelize = require(`../db/sequelize`);
 const LAST_LIMIT = 4;
 
 class CommentService {
-  async findOne(id) {
+  static async findOne(id) {
     const {Comment} = (await sequelize()).models;
     return (await Comment.findByPk(id, {include: [`author`, `article`]})).toJSON();
   }
 
-  async findAll() {
+  static async findAll() {
     const {Comment} = (await sequelize()).models;
     return (await Comment.findAll({
       include: [`author`, `article`],
@@ -19,7 +19,7 @@ class CommentService {
     })).map((comment) => comment.toJSON());
   }
 
-  async findLast() {
+  static async findLast() {
     const {Comment} = (await sequelize()).models;
     return (await Comment.findAll({
       include: [`author`, `article`],
@@ -28,12 +28,12 @@ class CommentService {
     })).map((comment) => comment.toJSON());
   }
 
-  async create(data) {
+  static async create(data) {
     const {Comment} = (await sequelize()).models;
     return await Comment.create(data);
   }
 
-  async delete(id) {
+  static async delete(id) {
     const {Comment} = (await sequelize()).models;
     return await Comment.destroy({where: {id}});
   }

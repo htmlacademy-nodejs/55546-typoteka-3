@@ -4,7 +4,7 @@ const {literal} = require(`sequelize`);
 const sequelize = require(`../db/sequelize`);
 
 class CategoryService {
-  async findOne(id) {
+  static async findOne(id) {
     const {Category} = (await sequelize()).models;
     return (await Category.findByPk(id, {
       attributes: {
@@ -13,7 +13,7 @@ class CategoryService {
     })).toJSON();
   }
 
-  async findAll() {
+  static async findAll() {
     const {Category} = (await sequelize()).models;
     return (await Category.findAll({
       attributes: {
@@ -22,32 +22,31 @@ class CategoryService {
     })).map((category) => category.toJSON());
   }
 
-  async create(data) {
+  static async create(data) {
     const {Category} = (await sequelize()).models;
     return await Category.create(data);
   }
 
-  async update(id, data) {
+  static async update(id, data) {
     const {Category} = (await sequelize()).models;
     return await Category.update(data, {where: {id}});
   }
 
-  async delete(id) {
+  static async delete(id) {
     const {Category} = (await sequelize()).models;
     return await Category.destroy({where: {id}});
   }
 
-  async setArticleCategory(articleId, categories) {
+  static async setArticleCategory(articleId, categories) {
     const {ArticleCategory} = (await sequelize()).models;
     await ArticleCategory.destroy({where: {'category_id': +articleId}});
     await ArticleCategory.bulkCreate(categories.map(
         (categoryId) => ({'article_id': +articleId, 'category_id': +categoryId})));
   }
 
-  async checkIsAddedCategories(categoryId) {
+  static async getIsAddedCategories(categoryId) {
     const {ArticleCategory} = (await sequelize()).models;
-    const article = await ArticleCategory.findOne({where: {'category_id': +categoryId}});
-    return article ? true : false;
+    return !!(await ArticleCategory.findOne({where: {'category_id': +categoryId}}));
   }
 }
 

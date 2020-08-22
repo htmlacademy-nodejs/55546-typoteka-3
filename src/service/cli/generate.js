@@ -3,7 +3,7 @@
 const chalk = require(`chalk`);
 const nanoid = require(`nanoid`);
 const fs = require(`fs`).promises;
-const {getRandomInt, shuffle, getArticleData} = require(`../../utils`);
+const {getRandomInt, shuffle, getArticleData, getRandomDate} = require(`../../utils`);
 
 const EXIT_CODE_ERROR = 1;
 const DEFAULT_COUNT = 1;
@@ -13,6 +13,7 @@ const MAX_COMMENTS_COUNT = 10;
 const MAX_COMMENTS_TEXT_COUNT = 5;
 const MAX_ARTICLES_COUNT = 1000;
 const MONTH_RANGE = 3;
+const MIN_ITEM_COUNT = 1;
 
 module.exports = {
   name: `--generate`,
@@ -24,20 +25,17 @@ module.exports = {
 
     const {titles, sentences, categories, comments} = await getArticleData();
 
-    const baseDatetime = new Date();
-    baseDatetime.setMonth(-MONTH_RANGE);
-
     const mockData = Array.from({length: +(count || DEFAULT_COUNT)}, () => ({
       id: nanoid(),
       title: titles[getRandomInt(0, titles.length - 1)],
-      announce: shuffle(sentences.slice()).slice(0, getRandomInt(1, MAX_ANNOUNCE_COUNT)),
-      fullText: shuffle(sentences.slice()).slice(0, getRandomInt(1, sentences.length)).join(` `),
-      createdDate: new Date(getRandomInt(+baseDatetime, Date.now())).toISOString().replace(/T/, ` `).replace(/\..*$/, ``),
-      category: shuffle(categories.slice()).slice(0, getRandomInt(1, categories.length - 1)),
-      comments: Array.from({length: getRandomInt(1, MAX_COMMENTS_COUNT)}, () => {
+      announce: shuffle(sentences.slice()).slice(0, getRandomInt(MIN_ITEM_COUNT, MAX_ANNOUNCE_COUNT)),
+      fullText: shuffle(sentences.slice()).slice(0, getRandomInt(MIN_ITEM_COUNT, sentences.length)).join(` `),
+      createdDate: getRandomDate(MONTH_RANGE),
+      category: shuffle(categories.slice()).slice(0, getRandomInt(MIN_ITEM_COUNT, categories.length - 1)),
+      comments: Array.from({length: getRandomInt(MIN_ITEM_COUNT, MAX_COMMENTS_COUNT)}, () => {
         return {
           id: nanoid(),
-          text: shuffle(comments.slice()).slice(0, getRandomInt(1, MAX_COMMENTS_TEXT_COUNT)).join(` `)
+          text: shuffle(comments.slice()).slice(0, getRandomInt(MIN_ITEM_COUNT, MAX_COMMENTS_TEXT_COUNT)).join(` `)
         };
       })
     }));

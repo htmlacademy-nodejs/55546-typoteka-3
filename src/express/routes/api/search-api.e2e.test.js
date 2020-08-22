@@ -4,15 +4,18 @@ const fs = require(`fs`).promises;
 const server = require(`../../index`);
 const request = require(`supertest`);
 
+const FILE_NAME = `mock.json`;
+const FIRST_MOCK_INDEX = 0;
+
 describe(`Проверка REST API для работы с поиском`, () => {
-  let mockOffer = null;
+  let mockArticle = null;
 
   beforeAll(async () => {
-    mockOffer = JSON.parse((await fs.readFile(`mock.json`)).toString())[0];
+    mockArticle = JSON.parse((await fs.readFile(FILE_NAME)).toString())[FIRST_MOCK_INDEX];
   });
 
   test(`Поиск публикаций`, async () => {
-    const res = await request(server).get(`/api/search?query=${encodeURIComponent(mockOffer.title)}`);
-    expect(res.statusCode).toBe(200);
+    const result = await request(server).get(`/api/search?query=${encodeURIComponent(mockArticle.title)}`);
+    expect(result.statusCode).toBe(200);
   });
 });

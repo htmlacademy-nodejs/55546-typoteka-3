@@ -22,87 +22,87 @@ describe(`Проверка REST API для работы со списком пу
   });
 
   test(`Получение всех публикаций`, async () => {
-    const res = await request(server).get(`/api/articles`);
-    expect(res.statusCode).toBe(200);
+    const result = await request(server).get(`/api/articles`);
+    expect(result.statusCode).toBe(200);
   });
 
   test(`Получение конкретной публикации по ID`, async () => {
-    const res = await request(server).get(`/api/articles/${REAL_ARTICLE_ID}`);
-    expect(res.statusCode).toBe(200);
+    const result = await request(server).get(`/api/articles/${REAL_ARTICLE_ID}`);
+    expect(result.statusCode).toBe(200);
   });
 
   test(`Получение несуществующей публикаций`, async () => {
-    const res = await request(server).get(`/api/articles/${FAKE_ARTICLE_ID}`);
-    expect(res.statusCode).toBe(400);
+    const result = await request(server).get(`/api/articles/${FAKE_ARTICLE_ID}`);
+    expect(result.statusCode).toBe(400);
   });
 
   test(`Создание новой публикации`, async () => {
-    const res = await request(server).post(`/api/articles`).send(mockArticle);
-    expect(res.statusCode).toBe(200);
+    const result = await request(server).post(`/api/articles`).send(mockArticle);
+    expect(result.statusCode).toBe(200);
   });
 
   test(`Создание новой публикации без нужных данных`, async () => {
-    const res = await request(server).post(`/api/articles`).send({});
-    expect(res.statusCode).toBe(400);
+    const result = await request(server).post(`/api/articles`).send({});
+    expect(result.statusCode).toBe(400);
   });
 
   test(`Обновление публикации`, async () => {
-    const res = await request(server).put(`/api/articles/${REAL_ARTICLE_ID}`);
-    expect(res.statusCode).toBe(200);
+    const result = await request(server).put(`/api/articles/${REAL_ARTICLE_ID}`);
+    expect(result.statusCode).toBe(200);
   });
 
   test(`Обновление несуществующей публикации`, async () => {
-    const res = await request(server).put(`/api/articles/${FAKE_ARTICLE_ID}`);
-    expect(res.statusCode).toBe(400);
+    const result = await request(server).put(`/api/articles/${FAKE_ARTICLE_ID}`);
+    expect(result.statusCode).toBe(400);
   });
 
   test(`Удаление публикации`, async () => {
-    const res = await request(server).delete(`/api/articles/${REAL_ARTICLE_ID}`);
-    expect(res.statusCode).toBe(200);
+    const result = await request(server).delete(`/api/articles/${REAL_ARTICLE_ID}`);
+    expect(result.statusCode).toBe(200);
   });
 
   test(`Удаление несуществующей публикации`, async () => {
-    const res = await request(server).delete(`/api/articles/${FAKE_ARTICLE_ID}`);
-    expect(res.statusCode).toBe(400);
+    const result = await request(server).delete(`/api/articles/${FAKE_ARTICLE_ID}`);
+    expect(result.statusCode).toBe(400);
   });
 
   test(`Получение списка комментариев к публикации`, async () => {
-    const res = await request(server).get(`/api/articles/${REAL_ARTICLE_ID}/comments`);
-    expect(res.statusCode).toBe(200);
+    const result = await request(server).get(`/api/articles/${REAL_ARTICLE_ID}/comments`);
+    expect(result.statusCode).toBe(200);
   });
 
   test(`Получение списка комментариев к несуществующей публикации`, async () => {
-    const res = await request(server).get(`/api/articles/${FAKE_ARTICLE_ID}/comments`);
-    expect(res.statusCode).toBe(400);
+    const result = await request(server).get(`/api/articles/${FAKE_ARTICLE_ID}/comments`);
+    expect(result.statusCode).toBe(400);
   });
 
   test(`Удаление комментария у публикации`, async () => {
-    const res = await request(server).delete(`/api/articles/${REAL_ARTICLE_ID}/comments/${REAL_COMMENT_ID}`);
-    expect(res.statusCode).toBe(200);
+    const result = await request(server).delete(`/api/articles/${REAL_ARTICLE_ID}/comments/${REAL_COMMENT_ID}`);
+    expect(result.statusCode).toBe(200);
   });
 
   test(`Удаление комментария у несуществующей публикации`, async () => {
-    const res = await request(server).delete(`/api/articles/${FAKE_ARTICLE_ID}/comments/${REAL_COMMENT_ID}`);
-    expect(res.statusCode).toBe(400);
+    const result = await request(server).delete(`/api/articles/${FAKE_ARTICLE_ID}/comments/${REAL_COMMENT_ID}`);
+    expect(result.statusCode).toBe(400);
   });
 
   test(`Удаление несуществующего комментария у публикации`, async () => {
-    const res = await request(server).delete(`/api/articles/${REAL_ARTICLE_ID}/comments/${FAKE_COMMENT_ID}`);
-    expect(res.statusCode).toBe(400);
+    const result = await request(server).delete(`/api/articles/${REAL_ARTICLE_ID}/comments/${FAKE_COMMENT_ID}`);
+    expect(result.statusCode).toBe(400);
   });
 
   test(`Создание нового комментария к публикации`, async () => {
-    const res = await request(server).put(`/api/articles/${REAL_ARTICLE_ID}/comments`).send({id: 1, text: `text`});
-    expect(res.statusCode).toBe(200);
+    const result = await request(server).put(`/api/articles/${REAL_ARTICLE_ID}/comments`).send({id: 1, text: `text`});
+    expect(result.statusCode).toBe(200);
   });
 
   test(`Создание нового комментария к публикации без нужных данных`, async () => {
-    const res = await request(server).put(`/api/articles/${REAL_ARTICLE_ID}/comments`).send({});
-    expect(res.statusCode).toBe(400);
+    const result = await request(server).put(`/api/articles/${REAL_ARTICLE_ID}/comments`).send({});
+    expect(result.statusCode).toBe(400);
   });
 
   test(`Создание нового комментария к несуществующего публикации`, async () => {
-    const res = await request(server).put(`/api/articles/${FAKE_ARTICLE_ID}/comments`).send({id: 1, text: `text`});
-    expect(res.statusCode).toBe(400);
+    const result = await request(server).put(`/api/articles/${FAKE_ARTICLE_ID}/comments`).send({id: 1, text: `text`});
+    expect(result.statusCode).toBe(400);
   });
 });

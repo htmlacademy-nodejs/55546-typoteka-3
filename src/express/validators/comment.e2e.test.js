@@ -9,41 +9,41 @@ const mock = {
 
 describe(`Проверка валидации комментария`, () => {
   test(`Корректна валидация`, async () => {
-    let res = null;
+    let result = null;
     try {
-      res = await schema.validateAsync(mock);
+      result = await schema.validateAsync(mock);
     } catch (err) {
       //
     }
 
-    expect(res).toStrictEqual(mock);
+    expect(result).toStrictEqual(mock);
   });
 
   test(`Валидация с недостаточной длинной сообщения`, async () => {
-    let res = null;
+    let result = null;
 
     mock.text = `Короткая строка`;
 
     try {
-      res = await schema.validateAsync(mock);
+      result = await schema.validateAsync(mock);
     } catch (err) {
       //
     }
 
-    expect(res).toEqual(null);
+    expect(result).toEqual(null);
   });
 
   test(`Валидация с не корректной датой`, async () => {
-    let res = null;
+    let result = null;
 
     mock[`date_create`] = `Дата`;
 
     try {
-      res = await schema.validateAsync(mock);
+      result = await schema.validateAsync(mock);
     } catch (err) {
       //
     }
 
-    expect(res).toEqual(null);
+    expect(result).toEqual(null);
   });
 });

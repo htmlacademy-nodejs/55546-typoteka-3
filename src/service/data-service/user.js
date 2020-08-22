@@ -4,22 +4,22 @@ const sequelize = require(`../db/sequelize`);
 const bcrypt = require(`bcrypt`);
 
 class SearchService {
-  async findOne(id) {
+  static async findOne(id) {
     const {User} = (await sequelize()).models;
     return (await User.findByPk(+id));
   }
 
-  async create(data) {
+  static async create(data) {
     const {User} = (await sequelize()).models;
     await User.create(data);
   }
 
-  async checkEmail(email) {
+  static async getIsEmailExist(email) {
     const {User} = (await sequelize()).models;
     return !!(await User.findOne({where: {email}}));
   }
 
-  async authorization(email, password) {
+  static async authorize(email, password) {
     const {User} = (await sequelize()).models;
     const user = await User.findOne({where: {email}});
     if (!user) {

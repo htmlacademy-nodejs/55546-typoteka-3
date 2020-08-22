@@ -1,9 +1,7 @@
 'use strict';
 
-const path = require(`path`);
-const axios = require(`axios`);
 const router = require(`express`).Router;
-const {getUrlRequest} = require(`../../utils`);
+const {createMulterStorage} = require(`../../utils`);
 const logger = require(`../../logger`).getLogger();
 const csrf = require(`csurf`);
 const {unlink} = require(`fs`).promises;
@@ -12,20 +10,13 @@ const authenticate = require(`../middleware/authenticate`);
 const {UPLOADED_PATH} = require(`../../const`);
 
 const route = router();
-const multerStorage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, `${UPLOADED_PATH}/users/`);
-  },
-  filename(req, file, cb) {
-    cb(null, `${+(Date.now())}${path.extname(file.originalname)}`);
-  }
-});
+const multerStorage = multer.diskStorage(createMulterStorage(`${UPLOADED_PATH}/users/`));
 
 const csrfMiddleware = csrf();
 
 route.post(`/comment-delete/:id`, authenticate, async (req, res) => {
   try {
-    await axios.delete(getUrlRequest(req, `/api/comments/${req.params.id}`));
+    await req.axios.delete(`/api/comments/${req.params.id}`);
     logger.info(`Комментарий был удалён.`);
   } catch (err) {
     logger.error(`Ошибка при удалении комментария: ${err}`);
@@ -51,7 +42,7 @@ route.post(`/register`, [multer({storage: multerStorage}).single(`avatar`), csrf
   }
 
   try {
-    await axios.post(getUrlRequest(req, `/api/user/`), JSON.stringify(body),
+    await req.axios.post(`/api/user/`, JSON.stringify(body),
         {headers: {'Content-Type': `application/json`}});
     logger.info(`Регистрация прошла успешно`);
     res.redirect(`/login`);
@@ -59,8 +50,8 @@ route.post(`/register`, [multer({storage: multerStorage}).single(`avatar`), csrf
   } catch (err) {
     try {
       await unlink(`${UPLOADED_PATH}/users/${body.avatar}`);
-    } catch (fileErr) {
-      logger.info(`Ошибка при очистке файла с аватаром пользователя: ${fileErr}`);
+    } catch (fileError) {
+      logger.info(`Ошибка при очистке файла с аватаром пользователя: ${fileError}`);
     }
 
     if (err.response && err.response.data) {
@@ -89,7 +80,7 @@ route.post(`/login`, csrfMiddleware, async (req, res) => {
   const {body} = req;
   let errors = null;
   try {
-    const user = await axios.post(getUrlRequest(req, `/api/user/login`), JSON.stringify(body),
+    const user = await req.axios.post(`/api/user/login`, JSON.stringify(body),
         {headers: {'Content-Type': `application/json`}});
 
     req.session[`user_id`] = user.data.id;

@@ -12,17 +12,15 @@ const {PASSWORD_SALT} = require(`../../../const`);
 
 const route = router();
 
-module.exports = async (app, ClassService) => {
+module.exports = async (app, service) => {
   logger.info(`Подключение user api`);
-
-  const service = new ClassService();
 
   app.use(`/api/user`, route);
 
   route.post(`/`, validatorMiddleware(registerSchemaValidator), async (req, res) => {
     const {body} = req;
 
-    if (!(await service.checkEmail(body.email))) {
+    if (!(await service.getIsEmailExist(body.email))) {
       res.status(400).json({message: [`Указанный почтовый ящик уже используется`], data: {}});
       return;
     }
@@ -43,7 +41,7 @@ module.exports = async (app, ClassService) => {
 
   route.post(`/login`, validatorMiddleware(loginSchemaValidator), async (req, res) => {
     const {email, password} = req.body;
-    const {status, message, user} = await service.authorization(email, password);
+    const {status, message, user} = await service.authorize(email, password);
     if (!status) {
       res.status(400).json({message, data: {}});
       return;

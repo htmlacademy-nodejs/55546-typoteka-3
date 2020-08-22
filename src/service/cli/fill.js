@@ -17,8 +17,8 @@ const MAX_ANNOUNCE_COUNT = 4;
 const DEFAULT_USER_PASSWORD = `123456`;
 
 const CommentsCount = {
-  min: 2,
-  max: 10,
+  MIN: 2,
+  MAX: 10,
 };
 
 module.exports = {

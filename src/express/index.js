@@ -4,8 +4,6 @@ const path = require(`path`);
 const express = require(`express`);
 const appRoutes = require(`./routes`);
 
-const logger = require(`../logger`).getLogger();
-
 const apiArticles = require(`./routes/api/articles`);
 const apiCategories = require(`./routes/api/categories`);
 const apiSearch = require(`./routes/api/search`);
@@ -26,20 +24,20 @@ const categoriesRoute = require(`./routes/categories`);
 
 const getUser = require(`./middleware/get-user`);
 const clientError = require(`./middleware/404`);
+const debugLog = require(`./middleware/debug-log`);
+const webSocket = require(`./middleware/web-socket`);
+const setAdminId = require(`./middleware/set-admin-id`);
+const axios = require(`./middleware/axios`);
 
 const STATIC_DIR = path.join(__dirname, `public`);
+const SESSION_SECRET = `SECRET_SESSION`;
+const SESSION_NAME = `session_id`;
+
 const app = express();
 
-const socketObject = {
-  clients: []
-};
-
-app.set(`socketObject`, socketObject);
-
-app.use((req, res, next) => {
-  req.socket = socketObject;
-  next();
-});
+app.use(axios);
+app.use(setAdminId);
+app.use(webSocket(app));
 
 app.set(`view engine`, `pug`);
 app.set(`views`, path.join(__dirname, `templates`));
@@ -49,17 +47,14 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 app.use(expressSession({
-  secret: `SECRET_SESSION`,
+  secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  name: `session_id`
+  name: SESSION_NAME
 }));
-app.use(getUser);
 
-app.use((req, res, next) => {
-  logger.debug(`Маршрут запроса: ${req.url}`);
-  next();
-});
+app.use(getUser);
+app.use(debugLog);
 
 apiArticles(app, dataServiceArticle);
 apiCategories(app, dataServiceCategory);

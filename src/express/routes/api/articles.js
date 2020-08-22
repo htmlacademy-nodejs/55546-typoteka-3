@@ -7,10 +7,8 @@ const articleSchemaValidator = require(`../../validators/article`);
 
 const route = router();
 
-module.exports = async (app, ClassService) => {
+module.exports = async (app, service) => {
   logger.info(`Подключение articles api`);
-
-  const service = new ClassService();
 
   app.use(`/api/articles`, route);
 

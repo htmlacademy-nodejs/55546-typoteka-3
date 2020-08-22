@@ -1,6 +1,11 @@
 'use strict';
 
+const path = require(`path`);
+const moment = require(`moment`);
 const fs = require(`fs`).promises;
+
+const MIN_COUNT_PAGE = 1;
+const OFFSET_NEXT_PAGE = 1;
 
 const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
@@ -13,9 +18,7 @@ const shuffle = (someArray) => {
   return someArray;
 };
 
-const getUrlRequest = (req, path) => new URL(path, `http://${req.headers.host}`).href;
-
-const getDataByFile = async (path) => (await fs.readFile(path)).toString().trim().split(`\n`);
+const getDataByFile = async (dataPath) => (await fs.readFile(dataPath)).toString().trim().split(`\n`);
 
 const getArticleData = async () => ({
   titles: await getDataByFile(`data/titles.txt`),
@@ -24,22 +27,47 @@ const getArticleData = async () => ({
   comments: await getDataByFile(`data/comments.txt`),
 });
 
-const pagination = (total, limit, activePage) => {
+const createPagination = (total, limit, activePage) => {
   const countPage = Math.ceil(total / limit);
 
   return {
-    isActive: countPage > 1,
-    next: {status: activePage >= 1 && activePage < countPage, page: +activePage + 1},
-    prev: {status: activePage > 1 && activePage <= countPage, page: +activePage - 1},
+    isActive: countPage > MIN_COUNT_PAGE,
+    next: {status: activePage >= MIN_COUNT_PAGE && activePage < countPage, page: +activePage + OFFSET_NEXT_PAGE},
+    prev: {status: activePage > MIN_COUNT_PAGE && activePage <= countPage, page: +activePage - OFFSET_NEXT_PAGE},
     pages: Array.from({length: countPage},
         (_it, idx) => ({page: idx + 1, isActive: +activePage === (idx + 1)}))
   };
+};
+
+const createMulterStorage = (savePathDir) => ({
+  destination(req, file, cb) {
+    cb(null, savePathDir);
+  },
+  filename(req, file, cb) {
+    cb(null, `${+(Date.now())}${path.extname(file.originalname)}`);
+  }
+});
+
+const getCorrectDateFormat = (date) => moment(date).format(`DD.MM.YYYY hh:mm`);
+
+const setCorrectDate = (elements = []) => elements.map((element) => {
+  element[`date_create`] = getCorrectDateFormat(element[`date_create`]);
+  return element;
+});
+
+const getRandomDate = (monthDifference) => {
+  const baseDatetime = new Date();
+  baseDatetime.setMonth(monthDifference);
+  return moment(getRandomInt(+baseDatetime, +Date.now())).format(`YYYY.MM.DD. hh:mm:ss`);
 };
 
 module.exports = {
   getArticleData,
   getRandomInt,
   shuffle,
-  getUrlRequest,
-  pagination,
+  createPagination,
+  createMulterStorage,
+  getRandomDate,
+  getCorrectDateFormat,
+  setCorrectDate,
 };

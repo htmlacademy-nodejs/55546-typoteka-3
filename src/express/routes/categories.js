@@ -1,8 +1,6 @@
 'use strict';
 
 const router = require(`express`).Router;
-const {getUrlRequest} = require(`../../utils`);
-const axios = require(`axios`);
 const authenticate = require(`../middleware/authenticate`);
 const logger = require(`../../logger`).getLogger();
 
@@ -11,7 +9,7 @@ const route = router();
 route.get(`/`, authenticate, async (req, res) => {
   let categories = [];
   try {
-    categories = (await axios.get(getUrlRequest(req, `/api/categories`))).data;
+    categories = (await req.axios.get(`/api/categories`)).data;
   } catch (err) {
     logger.error(`Ошибка при получении списка категорий`);
   }
@@ -24,7 +22,7 @@ route.post(`/`, authenticate, async (req, res) => {
   let errors = null;
 
   try {
-    await axios.post(getUrlRequest(req, `/api/categories`), JSON.stringify(req.body),
+    await req.axios.post(`/api/categories`, JSON.stringify(req.body),
         {headers: {'Content-Type': `application/json`}});
     logger.info(`Создана новая категория`);
   } catch (err) {
@@ -36,7 +34,7 @@ route.post(`/`, authenticate, async (req, res) => {
   }
 
   try {
-    categories = (await axios.get(getUrlRequest(req, `/api/categories`))).data;
+    categories = (await req.axios.get(`/api/categories`)).data;
   } catch (err) {
     logger.error(`Ошибка при получении списка категорий`);
   }
@@ -51,7 +49,7 @@ route.post(`/action/:id`, authenticate, async (req, res) => {
   if (action) {
     if (action === `edit`) {
       try {
-        await axios.put(getUrlRequest(req, `/api/categories/${id}`), JSON.stringify({title}),
+        await req.axios.put(`/api/categories/${id}`, JSON.stringify({title}),
             {headers: {'Content-Type': `application/json`}});
         logger.info(`Категория отредактирована`);
       } catch (err) {
@@ -59,7 +57,7 @@ route.post(`/action/:id`, authenticate, async (req, res) => {
       }
     } else if (action === `delete`) {
       try {
-        await axios.delete(getUrlRequest(req, `/api/categories/${id}`));
+        await req.axios.delete(`/api/categories/${id}`);
         logger.info(`Категория удалена`);
       } catch (err) {
         logger.error(`Ошибка при удалении категорий (${id}): ${err}`);

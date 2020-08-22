@@ -5,9 +5,10 @@ const sequelize = require(`../db/sequelize`);
 const {PAGINATION_LIMIT} = require(`../../const`);
 
 const POPULAR_LIMIT = 4;
+const OFFSET_PAGE = 1;
 
 class ArticleService {
-  async findOne(id) {
+  static async findOne(id) {
     const {Article, Comment, Category} = (await sequelize()).models;
     return (await Article.findByPk(id, {
       include: [
@@ -30,27 +31,27 @@ class ArticleService {
     })).toJSON();
   }
 
-  async findAll() {
+  static async findAll() {
     const {Article} = (await sequelize()).models;
     return (await Article.findAll({include: [`categories`, `comments`]}))
       .map((article) => article.toJSON());
   }
 
-  async findAllByPage(page) {
+  static async findAllByPage(page) {
     const {Article} = (await sequelize()).models;
     return (await Article.findAll({
       include: [`categories`, `comments`],
       limit: PAGINATION_LIMIT,
-      offset: ((page - 1) * PAGINATION_LIMIT),
+      offset: ((page - OFFSET_PAGE) * PAGINATION_LIMIT),
       order: [literal(`date_create DESC`)]
     })).map((article) => article.toJSON());
   }
 
-  async getCount() {
+  static async getCount() {
     return await (await sequelize()).models.Article.count();
   }
 
-  async findAllByCategory(categoryId, page) {
+  static async findAllByCategory(categoryId, page) {
     const {Article, ArticleCategory} = (await sequelize()).models;
     return (await Article.findAll({
       include: [`categories`, `comments`],
@@ -62,17 +63,17 @@ class ArticleService {
         }).map((data) => +data[`article_id`]),
       },
       limit: PAGINATION_LIMIT,
-      offset: ((page - 1) * PAGINATION_LIMIT),
+      offset: ((page - OFFSET_PAGE) * PAGINATION_LIMIT),
       order: [literal(`date_create DESC`)]
     })).map((article) => article.toJSON());
   }
 
-  async getCountByCategory(categoryId) {
+  static async getCountByCategory(categoryId) {
     return await (await sequelize()).models.ArticleCategory
       .count({where: {'category_id': categoryId}});
   }
 
-  async findPopular() {
+  static async findPopular() {
     const {Article} = (await sequelize()).models;
     return (await Article.findAll({
       attributes: {
@@ -85,17 +86,17 @@ class ArticleService {
     })).map((article) => article.toJSON());
   }
 
-  async create(data) {
+  static async create(data) {
     const {Article} = (await sequelize()).models;
     return await Article.create(data);
   }
 
-  async update(id, data) {
+  static async update(id, data) {
     const {Article} = (await sequelize()).models;
     return await Article.update(data, {where: {id}});
   }
 
-  async delete(id) {
+  static async delete(id) {
     const {Article} = (await sequelize()).models;
     return await Article.destroy({where: {id}});
   }

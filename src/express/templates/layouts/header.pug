@@ -9,9 +9,9 @@ header.header
           a.header__registration(href='/register') Регистрация
         li.header__list-item
           a.header__enter(href='/login') Вход с паролем
-      else if user.id !== 1
+      else if user.id !== adminId
         li.header__list-item
-          p= user.name
+          p= `${user.name} ${user.surname}`
         li.header__list-item
           a.header__exit(href='/logout') Выйти
       else
@@ -23,7 +23,7 @@ header.header
               a(href='/my') Список публикации
               a(href='/my/comments') Список комментариев
               a(href='/categories') Список категорий
-  if user && user.id !== 1
+  if user && user.id !== adminId
     a.header__avatar.avatar
       img(src=`/upload/users/${user.avatar}`, alt='аватар пользователя')
   a.header__search.button.button--search(href='/search', aria-label='поиск по сайту')

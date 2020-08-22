@@ -7,10 +7,8 @@ const categorySchemaValidator = require(`../../validators/category`);
 
 const route = router();
 
-module.exports = async (app, ClassService) => {
+module.exports = async (app, service) => {
   logger.info(`Подключение categories api`);
-
-  const service = new ClassService();
 
   app.use(`/api/categories`, route);
 
@@ -42,7 +40,7 @@ module.exports = async (app, ClassService) => {
   });
 
   route.delete(`/:id`, async (req, res) => {
-    if (!(await service.checkIsAddedCategories(req.params.id))) {
+    if (!(await service.getIsAddedCategories(req.params.id))) {
       await service.delete(req.params.id);
       res.status(200).end();
       return;
