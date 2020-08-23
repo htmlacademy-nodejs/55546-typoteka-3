@@ -10,6 +10,8 @@ const USER_COUNT_REMOVE = 1;
 module.exports = (app) => {
   logger.info(`SocketIO start`);
 
+  app.set(`socketObject`, {clients: []});
+
   const server = http.createServer(app);
   io(server).on(`connection`, (socket) => {
     const {address: ip} = socket.handshake;

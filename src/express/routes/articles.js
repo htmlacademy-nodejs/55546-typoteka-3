@@ -184,14 +184,16 @@ route.post(`/:id`, async (req, res) => {
         }), {headers: {'Content-Type': `application/json`}});
     logger.info(`Комментарий был успешно создан.`);
 
-    req.socket.clients.forEach((client) => client.emit(`update-comments`, createdComment.data));
+    const socket = req.app.get(`socketObject`);
+
+    socket.clients.forEach((client) => client.emit(`update-comments`, createdComment.data));
 
     let popularArticles = (await req.axios.get(`/api/articles/popular`)).data;
     popularArticles = popularArticles.filter((it) => it.commentsCount > MIN_ARTICLE_COMMENT_COUNT);
 
     logger.info(`Список популярных статей был обновлён.`, popularArticles);
 
-    req.socket.clients.forEach((client) => client.emit(`update-articles`, popularArticles));
+    socket.clients.forEach((client) => client.emit(`update-articles`, popularArticles));
 
     res.redirect(`/articles/${id}`);
     return;

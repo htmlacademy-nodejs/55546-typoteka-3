@@ -25,7 +25,6 @@ const categoriesRoute = require(`./routes/categories`);
 const getUser = require(`./middleware/get-user`);
 const clientError = require(`./middleware/404`);
 const debugLog = require(`./middleware/debug-log`);
-const webSocket = require(`./middleware/web-socket`);
 const setAdminId = require(`./middleware/set-admin-id`);
 const axios = require(`./middleware/axios`);
 
@@ -44,7 +43,6 @@ app.use(express.urlencoded({extended: true}));
 
 app.use(axios);
 app.use(setAdminId);
-app.use(webSocket(app));
 
 app.use(expressSession({
   secret: SESSION_SECRET,
