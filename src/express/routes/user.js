@@ -48,10 +48,12 @@ route.post(`/register`, [multer({storage: multerStorage}).single(`avatar`), csrf
     res.redirect(`/login`);
     return;
   } catch (err) {
-    try {
-      await unlink(`${UPLOADED_PATH}/users/${body.avatar}`);
-    } catch (fileError) {
-      logger.info(`Ошибка при очистке файла с аватаром пользователя: ${fileError}`);
+    if (body.avatar) {
+      try {
+        await unlink(`${UPLOADED_PATH}/users/${body.avatar}`);
+      } catch (fileError) {
+        logger.info(`Ошибка при очистке файла с аватаром пользователя: ${fileError}`);
+      }
     }
 
     if (err.response && err.response.data) {

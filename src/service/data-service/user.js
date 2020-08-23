@@ -16,7 +16,7 @@ class SearchService {
 
   static async getIsEmailExist(email) {
     const {User} = (await sequelize()).models;
-    return !!(await User.findOne({where: {email}}));
+    return !(await User.findOne({where: {email}}));
   }
 
   static async authorize(email, password) {

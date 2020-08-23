@@ -35,16 +35,16 @@ const SESSION_NAME = `session_id`;
 
 const app = express();
 
-app.use(axios);
-app.use(setAdminId);
-app.use(webSocket(app));
-
 app.set(`view engine`, `pug`);
 app.set(`views`, path.join(__dirname, `templates`));
 
 app.use(express.static(STATIC_DIR));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+
+app.use(axios);
+app.use(setAdminId);
+app.use(webSocket(app));
 
 app.use(expressSession({
   secret: SESSION_SECRET,
