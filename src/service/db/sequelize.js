@@ -16,6 +16,7 @@ const sequelize = new Sequelize(
       dialect: `postgres`,
       host: config.DB_PGHOST,
       port: config.DB_PGPORT,
+      logging: false
     });
 
 const models = {

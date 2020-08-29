@@ -7,6 +7,16 @@ const {wrapperDataService} = require(`../../utils`);
 const LAST_LIMIT = 4;
 
 class CommentService {
+  static findOne(id) {
+    return wrapperDataService(async () => {
+      const {Comment} = (await sequelize()).models;
+      return await Comment.findOne({
+        where: {id},
+        include: [`author`, `article`],
+      });
+    }, `Ошибка при получении конкретного комментария`, []);
+  }
+
   static findAll() {
     return wrapperDataService(async () => {
       const {Comment} = (await sequelize()).models;
