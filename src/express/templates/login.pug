@@ -5,9 +5,11 @@ block content
     h1.visually-hidden Регистрация пользователя
     section.modal
       .popup.popup--registration
-        button.popup__button.button.button--popup-close(type='button', aria-label='Закрыть окно') Закрыть окно
+        a.popup__button.button.button--popup-close(href='/', aria-label='Закрыть окно') Закрыть окно
         h2.visually-hidden Форма входа
         ul.popup__tabs
+          li.popup__tab.popup__tab--register
+            a.popup__tab-switcher.button(href='/register') Регистрация
           li.popup__tab.popup__tab--log-in
             button.popup__tab-switcher.button(type='button') Войти
         .popup__form.form.form--log-in

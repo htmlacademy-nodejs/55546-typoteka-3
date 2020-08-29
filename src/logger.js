@@ -2,10 +2,15 @@
 
 const pino = require(`pino`);
 
+const LoggerConfig = {
+  NAME: `pino-and-express`,
+  DEFAULT_LEVEL: `info`,
+};
+
 const level = process.env.LOG_LEVEL;
 const logger = pino({
-  name: `pino-and-express`,
-  level: level ? level.trim() : `info`
+  name: LoggerConfig.NAME,
+  level: level ? level.trim() : LoggerConfig.DEFAULT_LEVEL
 });
 
 module.exports = {

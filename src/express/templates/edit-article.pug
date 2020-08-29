@@ -13,7 +13,7 @@ block content
                 .new-publication__date-form-division
                   .new-publication__date-block
                     label(for='new-publication-date', aria-label='Календарь')
-                    input#new-publication-date(type='text', name='date_create', placeholder='21.03.2019', value= article.date_create)
+                    input#new-publication-date(type='text', name='dateCreate', placeholder='21.03.2019', value= article.dateCreate)
               button.new-publication__button.button.button--colored(type='submit') Опубликовать
             button.popup__button.button.button--popup-close(type='button', aria-label='Закрыть окно') Закрыть окно
             .new-publication__form.form
@@ -47,9 +47,9 @@ block content
                   .form__error-message= objectError.announce
                 .form__field.form__field--publication-text
                   label
-                    textarea(rows='1', name='full_text', placeholder='Полный текст публикации')= article.full_text || ''
-                if objectError.full_text
-                  .form__error-message= objectError.full_text
+                    textarea(rows='1', name='fullText', placeholder='Полный текст публикации')= article.fullText || ''
+                if objectError.fullText
+                  .form__error-message= objectError.fullText
             if errors
               .form__validation-error
                 p.form__error-message При редактировании статьи произошли ошибки:

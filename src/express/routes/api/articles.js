@@ -4,6 +4,8 @@ const router = require(`express`).Router;
 const logger = require(`../../../logger`).getLogger();
 const validatorMiddleware = require(`../../middleware/validator-post`);
 const articleSchemaValidator = require(`../../validators/article`);
+const {HttpCode: {OK, NOT_FOUND, CREATED}} = require(`../../../http-code`);
+const {runAsyncWrapper, callbackErrorApi} = require(`../../../utils`);
 
 const route = router();
 
@@ -12,76 +14,43 @@ module.exports = async (app, service) => {
 
   app.use(`/api/articles`, route);
 
-  // GET / api / articles — ресурс возвращает список публикаций;
-  route.get(`/`, async (req, res) => {
-    res.json(await service.findAll());
-  });
+  route.get(`/`, runAsyncWrapper(async (req, res) => {
+    res.status(OK).json(await service.findAll());
+  }, callbackErrorApi(`Ошибка при получении списка всех статей`)));
 
-  route.get(`/popular`, async (req, res) => {
-    logger.info(`Запрос наиболее популярных статей`);
-    res.json(await service.findPopular());
-  });
+  route.get(`/popular`, runAsyncWrapper(async (req, res) => {
+    res.status(OK).json(await service.findPopular());
+  }, callbackErrorApi(`Ошибка при получении списка популярных статей`)));
 
-  // GET / api / articles /: articleId — возвращает полную информацию о публикации;
-  route.get(`/:articleId`, async (req, res) => {
-    const {articleId} = req.params;
-    try {
-      res.json(await service.findOne(articleId));
-    } catch (err) {
-      res.sendStatus(404);
-      logger.error(`Ошибка при получении статьи: ${articleId}`);
-    }
-  });
+  route.get(`/:articleId`, runAsyncWrapper(async (req, res) => {
+    res.status(OK).json(await service.findOne(req.params.articleId));
+  }, callbackErrorApi(`Ошибка при получении конкретной статьи`, NOT_FOUND)));
 
-  route.get(`/page/:page`, async (req, res) => {
-    res.json({
+  route.get(`/page/:page`, runAsyncWrapper(async (req, res) => {
+    res.status(OK).json({
       articles: (await service.findAllByPage(req.params.page)),
       count: (await service.getCount())
     });
-  });
+  }, callbackErrorApi(`Ошибка при получении статей для страницы`, NOT_FOUND)));
 
-  route.get(`/category/:categoryId/:page`, async (req, res) => {
+  route.get(`/category/:categoryId/:page`, runAsyncWrapper(async (req, res) => {
     const {categoryId, page} = req.params;
-    res.json({
+    res.status(OK).json({
       articles: (await service.findAllByCategory(categoryId, page)),
       count: (await service.getCountByCategory(categoryId))
     });
-  });
+  }, callbackErrorApi(`Ошибка при получении статей для страницы в категории`, NOT_FOUND)));
 
-  // POST / api / articles — создаёт новую публикацию;
-  route.post(`/`, validatorMiddleware(articleSchemaValidator, true), async (req, res) => {
-    try {
-      const article = await service.create(req.body);
-      res.status(200).json(article.dataValues);
-      logger.info(`Создана новая публикация`);
-    } catch (err) {
-      res.status(400).json({err});
-      logger.error(`Ошибка при создании публикации: ${err}`);
-    }
-  });
+  route.post(`/`, validatorMiddleware(articleSchemaValidator), runAsyncWrapper(async (req, res) => {
+    res.status(CREATED).json((await service.create(req.body)).dataValues);
+  }, callbackErrorApi(`Ошибка при создании статьи`)));
 
-  // PUT / api / articles /: articleId — редактирует определённую публикацию;
-  route.put(`/:articleId`, validatorMiddleware(articleSchemaValidator, true), async (req, res) => {
-    try {
-      const article = await service.update(req.params.articleId, req.body);
-      res.status(200).json(article.dataValues);
-      logger.info(`Редактирование публикации завершено`);
-    } catch (err) {
-      res.status(400).json(`Ошибка при редактирование публикации: ${err}`);
-      logger.error(`Ошибка при редактирование публикации: ${err}`);
-    }
-  });
+  route.put(`/:articleId`, validatorMiddleware(articleSchemaValidator), runAsyncWrapper(async (req, res) => {
+    res.status(OK).json((await service.update(req.params.articleId, req.body)).dataValues);
+  }, callbackErrorApi(`Ошибка при редактирование статьи`)));
 
-  // DELETE / api / articles /: articleId — удаляет публикацию;
-  route.delete(`/:articleId`, async (req, res) => {
-    const {articleId} = req.params;
-    try {
-      await service.delete(articleId);
-      res.json({response: `Публикация ${articleId} удалена.`});
-      logger.info(`Публикация ${articleId} удалена.`);
-    } catch (err) {
-      res.json({response: `Ошибка при удалении публикации: ${err}`});
-      logger.info(`Ошибка при удалении публикации: ${err}`);
-    }
-  });
+  route.delete(`/:articleId`, runAsyncWrapper(async (req, res) => {
+    await service.delete(req.params.articleId);
+    res.sendStatus(OK);
+  }, callbackErrorApi(`Ошибка при удалении статьи`)));
 };

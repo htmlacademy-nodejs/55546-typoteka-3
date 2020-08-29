@@ -4,7 +4,7 @@ const schema = require(`./comment`);
 
 const mock = {
   'text': `Тестовый комментарний для проверки валидации...`,
-  'date_create': new Date(),
+  'dateCreate': new Date(),
 };
 
 describe(`Проверка валидации комментария`, () => {
@@ -36,7 +36,7 @@ describe(`Проверка валидации комментария`, () => {
   test(`Валидация с не корректной датой`, async () => {
     let result = null;
 
-    mock[`date_create`] = `Дата`;
+    mock.dateCreate = `Дата`;
 
     try {
       result = await schema.validateAsync(mock);

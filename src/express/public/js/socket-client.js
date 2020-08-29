@@ -1,11 +1,13 @@
 
-(() => {
+(async () => {
   const MAX_COUNT_ITEMS = 4;
 
-  const TextLength = {
-    MIN: 0,
-    MAX: 100
-  };
+  const SocketEvent = await fetch(`/api/data/get-socket-event-const`)
+    .then((result) => result.json())
+    .catch((error) => {
+      console.error(`Ошибка при получении констант событий для SocketIO: ${error}`);
+      return {};
+    });
 
   const artcilesContainer = document.querySelector(`.hot__list`);
   const commentsContainer = document.querySelector(`.last__list`);
@@ -17,24 +19,24 @@
     return element.firstChild;
   };
 
-  socket.addEventListener(`update-articles`, (articles) => {
+  socket.addEventListener(SocketEvent.UPDATE_ARTICLESS, (articles) => {
     artcilesContainer.innerHTML = ``;
-    articles.forEach(({ id, announce, commentsCount }) => {
+    articles.forEach(({id, commentsCount, limitAnnounce}) => {
       artcilesContainer.appendChild(createElement(`<li class="hot__list-item">
         <a class="hot__list-link" href="/articles/${id}">
-          ${announce.length <= TextLength.MAX ? announce : `${announce.slice(TextLength.MIN, TextLength.MAX) }...`}
+          ${limitAnnounce}
           <sup class="hot__link-sup">${commentsCount}</sup>
         </a>
       </li>`));
     })
   });
 
-  socket.addEventListener(`update-comments`, ({ text, article, author }) => {
+  socket.addEventListener(SocketEvent.UPDATE_COMMENTS, ({article, author, limitText}) => {
     const items = [createElement(`<li class="last__list-item">
       <img class="last__list-image" src="/upload/users/${author.avatar}" width="20" height="20" alt="Аватар пользователя">
       <b class="last__list-name">${author.name} ${author.surname}</b>
       <a class="last__list-link" href="/articles/${article.id}">
-        ${text.length <= TextLength.MAX ? text : `${text.slice(TextLength.MIN, TextLength.MAX)}...`}}
+        ${limitText}
       </a>
     </li>`), ...commentsContainer.querySelectorAll(`.last__list-item`)]
       .splice(0, MAX_COUNT_ITEMS);
@@ -43,11 +45,11 @@
     items.forEach((it) => commentsContainer.appendChild(it));
   });
 
-  socket.addEventListener(`connect`, () => {
+  socket.addEventListener(SocketEvent.CONNECT, () => {
     console.log(`SocketIO - подключено`);
   });
 
-  socket.addEventListener(`disconnect`, () => {
+  socket.addEventListener(SocketEvent.DISCONNECT, () => {
     console.log(`SocketIO - отключено`);
   });
 }) ();

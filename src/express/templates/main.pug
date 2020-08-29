@@ -11,7 +11,7 @@ block content
         each category in categories
           if category.articlesCount > 0
             li.themes__item
-              a.themes__item-link(href=`/articles/category/${category.id}`)= category.title
+              a.themes__item-link(href=category.link)= category.title
                 sup= category.articlesCount
     .main-page__section-flex
       section.main-page__hot.hot
@@ -24,7 +24,7 @@ block content
           ul.hot__list
             each article in popularArticles
               li.hot__list-item
-                a.hot__list-link(href=`/articles/${article.id}`)= article.announce.length > 100 ? `${article.announce.slice(0, 100)}...` : article.announce
+                a.hot__list-link(href=article.link)= article.limitAnnounce
                   sup.hot__link-sup= article.commentsCount
       section.main-page__last.last
         h2.last__name
@@ -36,10 +36,10 @@ block content
           ul.last__list
             each comment in lastComments
               li.last__list-item
-                img.last__list-image(src= `/upload/users/${comment.author.avatar}`, width='20', height='20', alt='Аватар пользователя')
+                img.last__list-image(src=comment.author.avatarPath, width='20', height='20', alt='Аватар пользователя')
                 b.last__list-name= `${comment.author.name} ${comment.author.surname}`
                 if comment.text
-                  a.last__list-link(href=`/articles/${comment.article.id}`)= comment.text.length > 100 ? `${comment.text.slice(0, 100)}...` : comment.text
+                  a.last__list-link(href=comment.article.link)= comment.limitText
     section.main-page__list.preview
       h2.visually-hidden Список превью статей
       if !articles || articles.length === 0

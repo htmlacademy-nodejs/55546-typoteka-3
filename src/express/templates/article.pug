@@ -9,20 +9,20 @@ block content
         .post__wrapper
           .post__head
             a.post__backwards.button.button--backwards(href= refLink) Назад
-            time.post__date(datetime=article.date_create)=article.date_create
+            time.post__date(datetime=article.dateCreate)=article.dateCreateCorrectFormat
             h2.post__title.title.title--main= article.title
             ul.post__themes.themes
               each category in article.categories
                 li.themes__item
-                  a.themes__item-link(href=`/articles/category/${category.id}`)= category.title
+                  a.themes__item-link(href=category.link)= category.title
                     sup= category.articlesCount
           if article.img
             .post__picture
-              img(src= `/upload/articles/${article.img}`)
+              img(src=article.imgPath)
           .post__text
             h3= article.title
             p= article.announce
-            p= article.full_text
+            p= article.fullText
       .post__wrapper.post__wrapper--comments#comments
         section.post__comments.comments
           if !article.comments || article.comments.length === 0
@@ -33,17 +33,17 @@ block content
               each comment in article.comments
                 li.comments__comment
                   .comments__avatar.avatar
-                    img(src=`/upload/users/${comment.author.avatar}`, alt='аватар пользователя')
+                    img(src=comment.author.avatarPath, alt='аватар пользователя')
                   .comments__text
                     .comments__head
                       p= `${comment.author.name} ${comment.author.surname}`
-                      time.comments__date(datetime=comment.date_create)= comment.date_create
+                      time.comments__date(datetime=comment.dateCreate)= comment.dateCreateCorrectFormat
                     p.comments__message= comment.text
           if user
             .comments__footer.comments__footer--user
-              form(action=`/articles/${article.id}`, method='post')
+              form(action=article.link, method='post')
                 .comments__avatar.avatar
-                  img(src=`/upload/users/${user.avatar}`, alt='аватар пользователя')
+                  img(src=user.avatarPath, alt='аватар пользователя')
                 label
                   textarea(name=`text`, rows='1', placeholder='Присоединиться к обсуждению')
                 button.comments__button.button.button--colored(type='submit') Опубликовать

@@ -8,7 +8,7 @@ const TitleLength = {
 };
 
 module.exports = Joi.object({
-  'title': Joi.string().min(TitleLength.MIN).max(TitleLength.MAX).required().messages({
+  title: Joi.string().min(TitleLength.MIN).max(TitleLength.MAX).required().messages({
     'string.min': `Минимальная длинна названия категории {#limit} символа`,
     'string.max': `Максимальная длинна названия категории {#limit} символа`,
     'string.required': `Поле обязательно к заполнению`,

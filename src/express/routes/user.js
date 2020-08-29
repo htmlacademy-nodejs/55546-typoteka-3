@@ -1,23 +1,23 @@
 'use strict';
 
 const router = require(`express`).Router;
-const {createMulterStorage} = require(`../../utils`);
+const {createMulterStorage, deleteImage, getValidateErrorInfo} = require(`../../utils`);
 const logger = require(`../../logger`).getLogger();
 const csrf = require(`csurf`);
-const {unlink} = require(`fs`).promises;
 const multer = require(`multer`);
 const authenticate = require(`../middleware/authenticate`);
 const {UPLOADED_PATH} = require(`../../const`);
 
+const USER_UPLOADED_PATH = `${UPLOADED_PATH}/users`;
+
 const route = router();
-const multerStorage = multer.diskStorage(createMulterStorage(`${UPLOADED_PATH}/users/`));
+const multerStorage = multer.diskStorage(createMulterStorage(USER_UPLOADED_PATH));
 
 const csrfMiddleware = csrf();
 
 route.post(`/comment-delete/:id`, authenticate, async (req, res) => {
   try {
     await req.axios.delete(`/api/comments/${req.params.id}`);
-    logger.info(`Комментарий был удалён.`);
   } catch (err) {
     logger.error(`Ошибка при удалении комментария: ${err}`);
   }
@@ -35,38 +35,25 @@ route.get(`/register`, csrfMiddleware, (req, res) => {
 
 route.post(`/register`, [multer({storage: multerStorage}).single(`avatar`), csrfMiddleware], async (req, res) => {
   const {file, body} = req;
-  let errors = null;
-
+  let errorsData = {errors: null, objectError: {}};
   if (file) {
     body.avatar = file.filename;
   }
 
   try {
-    await req.axios.post(`/api/user/`, JSON.stringify(body),
-        {headers: {'Content-Type': `application/json`}});
-    logger.info(`Регистрация прошла успешно`);
+    await req.axios.post(`/api/user/`, body);
     res.redirect(`/login`);
     return;
   } catch (err) {
-    if (body.avatar) {
-      try {
-        await unlink(`${UPLOADED_PATH}/users/${body.avatar}`);
-      } catch (fileError) {
-        logger.info(`Ошибка при очистке файла с аватаром пользователя: ${fileError}`);
-      }
-    }
-
-    if (err.response && err.response.data) {
-      errors = err.response.data.message;
-      logger.error(`Ошибка валидации: ${errors}`);
-    }
+    deleteImage(`${USER_UPLOADED_PATH}/${body.avatar}`);
+    errorsData = getValidateErrorInfo(err);
     logger.error(`Ошибка при регистрации: ${err}`);
   }
 
   res.render(`registration`, {
-    errors,
     data: body,
-    csrf: req.csrfToken()
+    csrf: req.csrfToken(),
+    ...errorsData
   });
 });
 
@@ -80,35 +67,26 @@ route.get(`/login`, csrfMiddleware, (req, res) => {
 
 route.post(`/login`, csrfMiddleware, async (req, res) => {
   const {body} = req;
-  let errors = null;
+  let errorsData = {errors: null, objectError: {}};
   try {
-    const user = await req.axios.post(`/api/user/login`, JSON.stringify(body),
-        {headers: {'Content-Type': `application/json`}});
-
-    req.session[`user_id`] = user.data.id;
-
-    logger.info(`Авторизация прошла успешно`);
+    req.session.userId = (await req.axios.post(`/api/user/login`, body)).data.id;
     res.redirect(`/`);
     return;
   } catch (err) {
-    if (err.response && err.response.data) {
-      errors = err.response.data.message;
-      logger.error(`Ошибка валидации: ${errors}`);
-    }
+    errorsData = getValidateErrorInfo(err);
     logger.error(`Ошибка при авторизации: ${err}`);
   }
 
   res.render(`login`, {
-    errors,
     data: body,
-    csrf: req.csrfToken()
+    csrf: req.csrfToken(),
+    ...errorsData
   });
 });
 
 route.get(`/logout`, (req, res) => {
-  delete req.session[`user_id`];
+  delete req.session.userId;
   res.redirect(`/login`);
 });
 
 module.exports = route;
-

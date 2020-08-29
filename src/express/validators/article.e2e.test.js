@@ -3,13 +3,13 @@
 const schema = require(`./article`);
 
 const mock = {
-  'title': `Тестовый заголовок`,
-  'img': `path/img.jpg`,
-  'announce': `Article text announce...`,
-  'full_text': `Article full_text info...`,
-  'categories': [3, 5, 7],
-  'author_id': 1,
-  'date_create': new Date(),
+  title: `Тестовый заголовок`,
+  img: `path/img.jpg`,
+  announce: `Article text announce...`,
+  fullText: `Article fullText info...`,
+  categories: [3, 5, 7],
+  authorId: 1,
+  dateCreate: new Date(),
 };
 
 describe(`Проверка валидации статьи`, () => {
@@ -69,7 +69,7 @@ describe(`Проверка валидации статьи`, () => {
   test(`Валидация с некорректным значением идентификатора автора`, async () => {
     let result = null;
 
-    mock[`author_id`] = `1`;
+    mock.authorId = 1;
 
     try {
       result = await schema.validateAsync(mock);
@@ -83,7 +83,7 @@ describe(`Проверка валидации статьи`, () => {
   test(`Валидация с не корректной датой`, async () => {
     let result = null;
 
-    mock[`date_create`] = `Дата`;
+    mock.dateCreate = `Дата`;
 
     try {
       result = await schema.validateAsync(mock);

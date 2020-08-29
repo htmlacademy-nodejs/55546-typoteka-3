@@ -3,6 +3,7 @@
 const fs = require(`fs`).promises;
 const server = require(`../../index`);
 const request = require(`supertest`);
+const {HttpCode} = require(`../../../http-code`);
 
 const FILE_NAME = `mock.json`;
 const FIRST_MOCK_INDEX = 0;
@@ -16,6 +17,6 @@ describe(`Проверка REST API для работы с поиском`, () =
 
   test(`Поиск публикаций`, async () => {
     const result = await request(server).get(`/api/search?query=${encodeURIComponent(mockArticle.title)}`);
-    expect(result.statusCode).toBe(200);
+    expect(result.statusCode).toBe(HttpCode.OK);
   });
 });

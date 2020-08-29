@@ -1,13 +1,15 @@
 'use strict';
 
-module.exports = (schema, isObject = false) => (
+const {HttpCode} = require(`../../http-code`);
+
+module.exports = (schema) => (
   async (req, res, next) => {
     const data = req.body;
     try {
       await schema.validateAsync(data, {abortEarly: false});
     } catch (err) {
-      res.status(400).json({
-        object: !isObject ? null : err.details.reduce((object, {message, context}) => ({
+      res.status(HttpCode.BAD_REQUEST).json({
+        object: err.details.reduce((object, {message, context}) => ({
           ...object,
           [context.label]: message
         }), {}),

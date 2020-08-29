@@ -3,6 +3,12 @@
 const config = require(`../../config`);
 const {Sequelize} = require(`sequelize`);
 
+const Article = require(`../../express/models/article`);
+const Category = require(`../../express/models/category`);
+const ArticleCategory = require(`../../express/models/article-category`);
+const Comment = require(`../../express/models/comment`);
+const User = require(`../../express/models/user`);
+
 const sequelize = new Sequelize(
     config.DB_PGDATABASE,
     config.DB_PGUSER,
@@ -12,47 +18,18 @@ const sequelize = new Sequelize(
       port: config.DB_PGPORT,
     });
 
-sequelize.import(`../../express/models/article.js`);
-sequelize.import(`../../express/models/article-category.js`);
-sequelize.import(`../../express/models/category.js`);
-sequelize.import(`../../express/models/comment.js`);
-sequelize.import(`../../express/models/user.js`);
+const models = {
+  Article: Article.init(sequelize, Sequelize),
+  ArticleCategory: ArticleCategory.init(sequelize, Sequelize),
+  Category: Category.init(sequelize, Sequelize),
+  Comment: Comment.init(sequelize, Sequelize),
+  User: User.init(sequelize, Sequelize),
+};
 
-const {Article, ArticleCategory, Category, Comment, User} = sequelize.models;
-
-Category.belongsToMany(Article, {
-  through: ArticleCategory,
-  as: `articles`,
-  foreignKey: `category_id`,
-});
-
-Article.belongsToMany(Category, {
-  through: ArticleCategory,
-  as: `categories`,
-  foreignKey: `article_id`,
-});
-
-Article.hasMany(Comment, {
-  as: `comments`,
-  foreignKey: `article_id`,
-});
-
-Article.hasOne(User, {
-  as: `author`,
-  sourceKey: `author_id`,
-  foreignKey: `id`
-});
-
-Comment.hasOne(User, {
-  as: `author`,
-  sourceKey: `author_id`,
-  foreignKey: `id`,
-});
-
-Comment.hasOne(Article, {
-  as: `article`,
-  sourceKey: `article_id`,
-  foreignKey: `id`,
+Object.values(models).forEach((model) => {
+  if (typeof model.associate === `function`) {
+    model.associate(models);
+  }
 });
 
 module.exports = async () => {

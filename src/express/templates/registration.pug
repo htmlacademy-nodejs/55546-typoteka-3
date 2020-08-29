@@ -5,11 +5,13 @@ block content
     h1.visually-hidden Регистрация пользователя
     section.modal
       .popup.popup--registration
-        button.popup__button.button.button--popup-close(type='button', aria-label='Закрыть окно') Закрыть окно
+        a.popup__button.button.button--popup-close(href='/', aria-label='Закрыть окно') Закрыть окно
         h2.visually-hidden Форма регистрации
         ul.popup__tabs
           li.popup__tab.popup__tab--register
             button.popup__tab-switcher.button(type='button') Регистрация
+          li.popup__tab.popup__tab--register
+            a.popup__tab-switcher.button(href='/login') Войти
         .popup__form.popup__form--active.form.form--register
           form(action='/register', method='post', enctype='multipart/form-data', novalidate)
             .form__field
@@ -26,7 +28,7 @@ block content
                 input(type='password', name='password', placeholder='Пароль', required, value=``)
             .form__field
               label
-                input(type='password', name='password-again', placeholder='Повтор пароля', required, value=``)
+                input(type='password', name='passwordAgain', placeholder='Повтор пароля', required, value=``)
             if errors
               .form__validation-error
                 p.form__error-message При регистрации произошли ошибки:

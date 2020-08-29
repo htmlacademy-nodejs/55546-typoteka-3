@@ -4,6 +4,8 @@ const router = require(`express`).Router;
 const logger = require(`../../../logger`).getLogger();
 const validatorMiddleware = require(`../../middleware/validator-post`);
 const commentSchemaValidator = require(`../../validators/comment`);
+const {HttpCode: {OK, CREATED}} = require(`../../../http-code`);
+const {runAsyncWrapper, callbackErrorApi} = require(`../../../utils`);
 
 const route = router();
 
@@ -12,24 +14,20 @@ module.exports = async (app, service) => {
 
   app.use(`/api/comments`, route);
 
-  // GET / api / comments / all - возвращает список всех комментариев
-  route.get(`/all`, async (req, res) => {
-    return res.status(200).json(await service.findAll());
-  });
+  route.get(`/all`, runAsyncWrapper(async (req, res) => {
+    res.status(OK).json(await service.findAll());
+  }, callbackErrorApi(`Ошибка при получении списка всех комментариев`)));
 
-  // GET / api / comments / last - возвращает список последних комментариев на сайте
-  route.get(`/last`, async (req, res) => {
-    return res.status(200).json(await service.findLast());
-  });
+  route.get(`/last`, runAsyncWrapper(async (req, res) => {
+    res.status(OK).json(await service.findLast());
+  }, callbackErrorApi(`Ошибка при получении списка последних комментариев`)));
 
-  // POST / api / comments /: articleId — создаёт новый комментарий
-  route.post(`/:articleId`, validatorMiddleware(commentSchemaValidator), async (req, res) => {
-    const result = await service.create(req.body);
-    return res.status(200).json(await service.findOne(result.id));
-  });
+  route.post(`/:articleId`, validatorMiddleware(commentSchemaValidator), runAsyncWrapper(async (req, res) => {
+    const createdComment = await service.create(req.body);
+    res.status(CREATED).json(await service.findOne(createdComment.id));
+  }, callbackErrorApi(`Ошибка при создании нового комментария`)));
 
-  // DELETE / api / comments /: commentId — удаляет указанный комментарий
-  route.delete(`/:commentId`, async (req, res) => {
-    return res.status(200).json(await service.delete(+req.params.commentId));
-  });
+  route.delete(`/:commentId`, runAsyncWrapper(async (req, res) => {
+    res.status(OK).json(await service.delete(+req.params.commentId));
+  }, callbackErrorApi(`Ошибка при удалении комментария`)));
 };

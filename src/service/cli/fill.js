@@ -15,6 +15,8 @@ const MAX_SENTENCES_COUNT = 4;
 const MAX_COMMENTS_TEXT_COUNT = 5;
 const MAX_ANNOUNCE_COUNT = 4;
 const DEFAULT_USER_PASSWORD = `123456`;
+const DEFAULT_USER_HASH_PASSWORD = `$2b$10$fTE8wdkBsEFCTbJFNHev4eZ7QVgRnh9gpq.h.ApRbRBzCCUnqrz/6`;
+const ARTICLE_INDEX_OFFSET = 1;
 
 const CommentsCount = {
   MIN: 2,
@@ -30,7 +32,12 @@ module.exports = {
     }
 
     const generator = new GeneratorHelper(await getArticleData());
-    const hashPassword = await bcrypt.hash(DEFAULT_USER_PASSWORD, PASSWORD_SALT);
+    const hashPassword = await bcrypt.hash(DEFAULT_USER_PASSWORD, PASSWORD_SALT)
+      .catch((error) => {
+        console.log(`При генерации хэша пароля возникла ошибка: ${error}.\n
+        Будет использован заранее созданный хэш пароля по умолчанию - ${DEFAULT_USER_PASSWORD}.`);
+        return DEFAULT_USER_HASH_PASSWORD;
+      });
 
     generator.createUser({
       id: 1,
@@ -38,7 +45,7 @@ module.exports = {
       surname: `Adminov`,
       email: `admin@mail.ru`,
       password: hashPassword,
-      avatar: `admin-1.jpg`,
+      // avatar: `admin-1.jpg`,
     });
 
     generator.createUser({
@@ -47,7 +54,7 @@ module.exports = {
       surname: `Robertov`,
       email: `rob@mail.ru`,
       password: hashPassword,
-      avatar: `avatar-2.jpg`,
+      // avatar: `avatar-2.jpg`,
     });
 
     const articleConfig = {
@@ -58,7 +65,7 @@ module.exports = {
     };
 
     Array.from({length: +(count || DEFAULT_ARTICLE_COUNT)}, (_it, idx) =>
-      generator.createArticle(ADMIN_ID, {...articleConfig, id: idx + 1}));
+      generator.createArticle(ADMIN_ID, {...articleConfig, id: idx + ARTICLE_INDEX_OFFSET}));
 
     try {
       await fs.writeFile(FILE_NAME, generator.generateSql());

@@ -2,12 +2,19 @@
 
 const path = require(`path`);
 const moment = require(`moment`);
+const {HttpCode} = require(`./http-code`);
+const logger = require(`./logger`).getLogger();
 const fs = require(`fs`).promises;
 
+const MOCK_DATA_PATH = `data`;
 const MIN_COUNT_PAGE = 1;
+const OFFSET_PAGE = 1;
 const OFFSET_NEXT_PAGE = 1;
+const RANDOM_INT_OFFSET = 1;
 
-const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const RANDOM_DATE_FORMAT = `YYYY.MM.DD. hh:mm:ss`;
+
+const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + RANDOM_INT_OFFSET)) + min;
 
 const shuffle = (someArray) => {
   for (let i = someArray.length - 1; i > 0; i--) {
@@ -18,14 +25,27 @@ const shuffle = (someArray) => {
   return someArray;
 };
 
-const getDataByFile = async (dataPath) => (await fs.readFile(dataPath)).toString().trim().split(`\n`);
+const getDataByFile = async (dataPath) => fs.readFile(dataPath)
+  .then((result) => result.toString().trim().split(`\n`))
+  .catch((error) => {
+    console.error(`Ошибка при получении данных из файла ${dataPath}: ${error}`);
+    return [];
+  });
 
-const getArticleData = async () => ({
-  titles: await getDataByFile(`data/titles.txt`),
-  sentences: await getDataByFile(`data/sentences.txt`),
-  categories: await getDataByFile(`data/categories.txt`),
-  comments: await getDataByFile(`data/comments.txt`),
-});
+const getArticleData = async () => {
+  const [titles, sentences, categories, comments] = await Promise.all([
+    getDataByFile(`${MOCK_DATA_PATH}/titles.txt`),
+    getDataByFile(`${MOCK_DATA_PATH}/sentences.txt`),
+    getDataByFile(`${MOCK_DATA_PATH}/categories.txt`),
+    getDataByFile(`${MOCK_DATA_PATH}/comments.txt`),
+  ])
+  .catch((error) => {
+    console.log(`Ошибка при получении данных: ${error}`);
+    return [];
+  });
+
+  return {titles, sentences, categories, comments};
+};
 
 const createPagination = (total, limit, activePage) => {
   const countPage = Math.ceil(total / limit);
@@ -34,8 +54,8 @@ const createPagination = (total, limit, activePage) => {
     isActive: countPage > MIN_COUNT_PAGE,
     next: {status: activePage >= MIN_COUNT_PAGE && activePage < countPage, page: +activePage + OFFSET_NEXT_PAGE},
     prev: {status: activePage > MIN_COUNT_PAGE && activePage <= countPage, page: +activePage - OFFSET_NEXT_PAGE},
-    pages: Array.from({length: countPage},
-        (_it, idx) => ({page: idx + 1, isActive: +activePage === (idx + 1)}))
+    pages: Array.from({length: countPage}, (_it, idx) =>
+      ({page: idx + OFFSET_PAGE, isActive: +activePage === (idx + OFFSET_PAGE)}))
   };
 };
 
@@ -48,17 +68,49 @@ const createMulterStorage = (savePathDir) => ({
   }
 });
 
-const getCorrectDateFormat = (date) => moment(date).format(`DD.MM.YYYY hh:mm`);
-
-const setCorrectDate = (elements = []) => elements.map((element) => {
-  element[`date_create`] = getCorrectDateFormat(element[`date_create`]);
-  return element;
-});
-
 const getRandomDate = (monthDifference) => {
   const baseDatetime = new Date();
   baseDatetime.setMonth(monthDifference);
-  return moment(getRandomInt(+baseDatetime, +Date.now())).format(`YYYY.MM.DD. hh:mm:ss`);
+  return moment(getRandomInt(+baseDatetime, +Date.now())).format(RANDOM_DATE_FORMAT);
+};
+
+const deleteImage = (imagePath) => {
+  fs.unlink(imagePath)
+    .catch((err) => {
+      logger.error(`Ошибка при удалении файла: ${err}`);
+    });
+};
+
+const getValidateErrorInfo = ({response}) => {
+  if (response && response.data) {
+    const {message, object} = response.data;
+    logger.error(`Ошибка валидации: ${message}`);
+    return {errors: message, objectError: object};
+  }
+
+  return {errors: null, objectError: {}};
+};
+
+const runAsyncWrapper = (callback, callbackError) => (req, res, next) =>
+  callback(req, res, next)
+    .catch(typeof callbackError === `function` ? callbackError(req, res) : next);
+
+const callbackErrorApi = (textError = `Ошибка`, status = HttpCode.BAD_REQUEST) => (req, res) => (error) => {
+  logger.error(`${textError}: ${error}`);
+  res.sendStatus(status);
+};
+
+const wrapperDataService = async (callback, textError, errorReturn, isThrowError = false) => {
+  try {
+    return callback();
+  } catch (err) {
+    if (isThrowError) {
+      throw new Error(textError);
+    }
+    logger.error(`${textError}: ${err}`);
+  }
+
+  return errorReturn;
 };
 
 module.exports = {
@@ -68,6 +120,9 @@ module.exports = {
   createPagination,
   createMulterStorage,
   getRandomDate,
-  getCorrectDateFormat,
-  setCorrectDate,
+  deleteImage,
+  getValidateErrorInfo,
+  runAsyncWrapper,
+  callbackErrorApi,
+  wrapperDataService,
 };

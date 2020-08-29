@@ -1,23 +1,57 @@
 'use strict';
 
-module.exports = (sequelize, DataTypes) => {
-  class Comment extends sequelize.Sequelize.Model { }
-  Comment.init({
-    'id': {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-      autoIncrementIdentity: true
-    },
-    'article_id': DataTypes.INTEGER,
-    'author_id': DataTypes.INTEGER,
-    'text': DataTypes.STRING,
-    'date_create': DataTypes.DATE,
-  }, {
-    sequelize,
-    tableName: `comments`,
-    timestamps: false
-  });
+const moment = require(`moment`);
+const {Model} = require(`sequelize`);
 
-  return Comment;
+const DATE_FORMAT = `DD.MM.YYYY hh:mm`;
+
+const TEXT_MAX_LENGTH = 100;
+
+module.exports = class Comment extends Model {
+  static init(sequelize, DataTypes) {
+    return super.init({
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+        autoIncrementIdentity: true
+      },
+      articleId: DataTypes.INTEGER,
+      authorId: DataTypes.INTEGER,
+      text: DataTypes.STRING,
+      dateCreate: DataTypes.DATE,
+      dateCreateCorrectFormat: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          return moment(this.dateCreate).format(DATE_FORMAT);
+        }
+      },
+      limitText: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          const {text} = this;
+          return text.length <= TEXT_MAX_LENGTH ? text : `${text.slice(0, TEXT_MAX_LENGTH)}...`;
+        }
+      },
+    }, {
+      sequelize,
+      tableName: `comments`,
+      timestamps: false
+    });
+  }
+
+  static associate({User, Article}) {
+    this.hasOne(User, {
+      as: `author`,
+      sourceKey: `authorId`,
+      foreignKey: `id`,
+    });
+
+    this.hasOne(Article, {
+      as: `article`,
+      sourceKey: `articleId`,
+      foreignKey: `id`,
+      hooks: true
+    });
+  }
 };

@@ -2,44 +2,28 @@
 
 const router = require(`express`).Router;
 const authenticate = require(`../middleware/authenticate`);
+const {getValidateErrorInfo} = require(`../../utils`);
 const logger = require(`../../logger`).getLogger();
 
 const route = router();
 
 route.get(`/`, authenticate, async (req, res) => {
-  let categories = [];
-  try {
-    categories = (await req.axios.get(`/api/categories`)).data;
-  } catch (err) {
-    logger.error(`Ошибка при получении списка категорий`);
-  }
-
-  res.render(`admin-categories`, {categories, errors: null});
+  res.render(`admin-categories`, {
+    categories: await req.requestHelper.getAllCategories(),
+    errors: null
+  });
 });
 
 route.post(`/`, authenticate, async (req, res) => {
-  let categories = [];
-  let errors = null;
-
+  let errorsData = {errors: null, objectError: {}};
   try {
-    await req.axios.post(`/api/categories`, JSON.stringify(req.body),
-        {headers: {'Content-Type': `application/json`}});
-    logger.info(`Создана новая категория`);
+    await req.axios.post(`/api/categories`, req.body);
   } catch (err) {
-    if (err.response && err.response.data) {
-      errors = err.response.data.message;
-      logger.error(`Ошибка валидации: ${errors}`);
-    }
+    errorsData = getValidateErrorInfo(err);
     logger.error(`Ошибка создании новой категории: ${err}`);
   }
 
-  try {
-    categories = (await req.axios.get(`/api/categories`)).data;
-  } catch (err) {
-    logger.error(`Ошибка при получении списка категорий`);
-  }
-
-  res.render(`admin-categories`, {categories, errors});
+  res.render(`admin-categories`, {categories: await req.requestHelper.getAllCategories(), ...errorsData});
 });
 
 route.post(`/action/:id`, authenticate, async (req, res) => {
@@ -47,21 +31,14 @@ route.post(`/action/:id`, authenticate, async (req, res) => {
   const {title, action} = req.body;
 
   if (action) {
-    if (action === `edit`) {
-      try {
-        await req.axios.put(`/api/categories/${id}`, JSON.stringify({title}),
-            {headers: {'Content-Type': `application/json`}});
-        logger.info(`Категория отредактирована`);
-      } catch (err) {
-        logger.error(`Ошибка при редактировании категорий (${id}): ${err}`);
-      }
-    } else if (action === `delete`) {
-      try {
+    try {
+      if (action === `edit`) {
+        await req.axios.put(`/api/categories/${id}`, {title});
+      } else if (action === `delete`) {
         await req.axios.delete(`/api/categories/${id}`);
-        logger.info(`Категория удалена`);
-      } catch (err) {
-        logger.error(`Ошибка при удалении категорий (${id}): ${err}`);
       }
+    } catch (err) {
+      logger.error(`Ошибка при совершении с действия - ${action} категорией - ${id} : ${err}`);
     }
   }
 

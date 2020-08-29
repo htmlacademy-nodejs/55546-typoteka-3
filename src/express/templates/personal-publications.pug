@@ -8,7 +8,7 @@ block content
         each article in articles
           li.notes__list-item
             form(action=`/articles/delete/${article.id}`, method=`post`)
-              time.notes__item-time(datetime=article.date_create)= article.date_create
+              time.notes__item-time(datetime=article.dateCreate)= article.dateCreateCorrectFormat
               a.notes__item-text(href=`/articles/edit/${article.id}`)= article.title
               button.notes__button.button.button--close-item(type='submit')
                 span.visually-hidden Закрыть строку списка

@@ -1,5 +1,8 @@
 'use strict';
 
+const {HttpCode} = require(`../../../http-code`);
+const {runAsyncWrapper, callbackErrorApi} = require(`../../../utils`);
+
 const router = require(`express`).Router;
 const logger = require(`../../../logger`).getLogger();
 
@@ -10,9 +13,7 @@ module.exports = async (app, service) => {
 
   app.use(`/api/search`, route);
 
-  route.get(`/`, async (req, res) => {
-    const {query} = req.query;
-    logger.info(`Получение списка статей по заголовку ${query}`);
-    res.status(200).json(await service.getSearch(query));
-  });
+  route.get(`/:title`, runAsyncWrapper(async (req, res) => {
+    res.status(HttpCode.OK).json(await service.getSearch(req.params.title));
+  }, callbackErrorApi(`Ошибка при поиске статей по заголовку`)));
 };
