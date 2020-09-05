@@ -2,7 +2,7 @@
 
 const path = require(`path`);
 const express = require(`express`);
-const appRoutes = require(`./routes`);
+const appRoutes = require(`./routes/main`);
 
 const apiArticles = require(`./routes/api/articles`);
 const apiCategories = require(`./routes/api/categories`);

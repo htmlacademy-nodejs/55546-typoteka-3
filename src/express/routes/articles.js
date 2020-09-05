@@ -1,5 +1,6 @@
 'use strict';
 
+const moment = require(`moment`);
 const router = require(`express`).Router;
 const {
   createPagination,
@@ -20,7 +21,7 @@ const DEFAULT_ARTICLES_COUNT = 0;
 const route = router();
 const multerStorage = multer.diskStorage(createMulterStorage(ARTICLE_UPLOADED_PATH));
 
-const getCorrectDate = (date) => date ? new Date(date.split(`.`).reverse().join(`.`)) : new Date();
+const getCorrectDate = (date) => date ? new Date(`${date.split(`.`).reverse().join(`.`)} ${moment().format(`HH:mm:ss`)}`) : new Date();
 
 route.post(`/delete/:id`, authenticate, async (req, res) => {
   const article = await req.requestHelper.getArticleById(req.params.id, `/my`);
@@ -53,7 +54,7 @@ route.get(`/category/:categoryId`, async (req, res) => {
         logger.error(`Ошибка при получении категорий: ${categoryId}: ${error}`);
         return null;
       }),
-    categories: await req.requestHelper.getAllCategories(),
+    categories: await req.requestHelper.getAllCategories(true),
     articles: data.articles,
     pagination: createPagination(data.count, PAGINATION_LIMIT, currentPage)
   });
@@ -126,7 +127,7 @@ route.post(`/:id`, async (req, res) => {
 
     req.app.get(`socketObject`)
       .distribution(SocketEvent.UPDATE_COMMENTS, createdComment.data)
-      .distribution(SocketEvent.UPDATE_ARTICLESS, await req.requestHelper.getPopularArticles());
+      .distribution(SocketEvent.UPDATE_ARTICLES, await req.requestHelper.getPopularArticles());
 
     res.redirect(`/articles/${id}`);
     return;

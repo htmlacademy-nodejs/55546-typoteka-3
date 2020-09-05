@@ -23,11 +23,7 @@ module.exports = async (app, service) => {
   }, callbackErrorApi(`Ошибка при получении списка последних комментариев`)));
 
   route.post(`/:articleId`, validatorMiddleware(commentSchemaValidator), runAsyncWrapper(async (req, res) => {
-    console.log(`CREATED COMMENT::1`);
     const createdComment = await service.create(req.body);
-    console.log(`CREATED COMMENT::2`);
-    console.log(createdComment);
-    console.log(`id`, createdComment.id);
     res.status(CREATED).json(await service.findOne(createdComment.id));
   }, callbackErrorApi(`Ошибка при создании нового комментария`)));
 

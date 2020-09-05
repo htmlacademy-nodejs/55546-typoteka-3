@@ -11,17 +11,18 @@ module.exports = class RequestHelper {
     this.res = res;
   }
 
-  async getAllCategories() {
-    return await this.req.axios.get(`/api/categories`)
-      .then((result) => result.data.filter((article) => article.articlesCount > MIN_CATEGORY_ARTICLE_COUNT))
+  getAllCategories(isOnlyWithArticles = false) {
+    return this.req.axios.get(`/api/categories`)
+      .then((result) => result.data.filter((article) => !isOnlyWithArticles ||
+        article.articlesCount > MIN_CATEGORY_ARTICLE_COUNT))
       .catch((error) => {
         logger.error(`Ошибка при получении списка категорий: ${error}`);
         return [];
       });
   }
 
-  async getArticleById(articleId, errorRedirect) {
-    return await this.req.axios.get(`/api/articles/${articleId}`)
+  getArticleById(articleId, errorRedirect) {
+    return this.req.axios.get(`/api/articles/${articleId}`)
       .then((result) => result.data)
       .catch((error) => {
         logger.error(`Ошибка при получении статьи: ${error}`);
@@ -30,8 +31,8 @@ module.exports = class RequestHelper {
       });
   }
 
-  async getPopularArticles() {
-    return await this.req.axios.get(`/api/articles/popular`)
+  getPopularArticles() {
+    return this.req.axios.get(`/api/articles/popular`)
       .then((result) => result.data.filter((article) => article.commentsCount > MIN_ARTICLE_COMMENT_COUNT))
       .catch((error) => {
         logger.error(`Ошибка при получении списка популярных статей: ${error}`);

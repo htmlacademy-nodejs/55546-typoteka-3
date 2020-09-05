@@ -2,7 +2,7 @@
 
 const config = require(`../../config`);
 const logger = require(`../../logger`).getLogger();
-const app = require(`../../express`);
+const app = require(`../../express/app`);
 const socketServer = require(`../../socket-server`);
 
 const DEFAULT_PORT = 8080;

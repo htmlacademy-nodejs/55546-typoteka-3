@@ -1,6 +1,14 @@
 ## Общие
 
-`PORT`
+`npm run start-front-server` - для запуска в рабочем режиме
+
+## Для инициализации БД
+
+1. Применить schema.sql
+2. Применить fill-db.sql
+
+Я это делал через Query Tool у БД
+https://yadi.sk/i/dfwQpN7GAg2Gbw
 
 ## Для работы с PostgreSQL
 

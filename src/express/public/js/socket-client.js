@@ -19,7 +19,7 @@
     return element.firstChild;
   };
 
-  socket.addEventListener(SocketEvent.UPDATE_ARTICLESS, (articles) => {
+  socket.addEventListener(SocketEvent.UPDATE_ARTICLES, (articles) => {
     artcilesContainer.innerHTML = ``;
     articles.forEach(({id, commentsCount, limitAnnounce}) => {
       artcilesContainer.appendChild(createElement(`<li class="hot__list-item">
