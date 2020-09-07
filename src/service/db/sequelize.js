@@ -1,5 +1,7 @@
 'use strict';
 
+console.log(`------------------sequelize-START`);
+
 const config = require(`../../config`);
 const {Sequelize} = require(`sequelize`);
 
@@ -10,6 +12,8 @@ const Comment = require(`../../express/models/comment`);
 const User = require(`../../express/models/user`);
 
 let sequelize = null;
+
+console.log(`-------------config`, config);
 
 if (config.DATABASE_URL) {
   sequelize = new Sequelize(config.DATABASE_URL, {
@@ -27,8 +31,6 @@ if (config.DATABASE_URL) {
         logging: false
       });
 }
-
-console.log(`-------------config`, config);
 
 // const sequelize = new Sequelize(
 //     config.DB_PGDATABASE,
