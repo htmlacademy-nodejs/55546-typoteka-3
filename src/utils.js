@@ -25,7 +25,7 @@ const shuffle = (someArray) => {
   return someArray;
 };
 
-const getDataByFile = async (dataPath) => fs.readFile(dataPath)
+const getDataByFile = (dataPath) => fs.readFile(dataPath)
   .then((result) => result.toString().trim().split(`\n`))
   .catch((error) => {
     console.error(`Ошибка при получении данных из файла ${dataPath}: ${error}`);

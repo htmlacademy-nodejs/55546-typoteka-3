@@ -45,7 +45,6 @@ module.exports = {
       surname: `Adminov`,
       email: `admin@mail.ru`,
       password: hashPassword,
-      // avatar: `admin-1.jpg`,
     });
 
     generator.createUser({
@@ -54,7 +53,6 @@ module.exports = {
       surname: `Robertov`,
       email: `rob@mail.ru`,
       password: hashPassword,
-      // avatar: `avatar-2.jpg`,
     });
 
     const articleConfig = {
@@ -68,7 +66,7 @@ module.exports = {
       generator.createArticle(ADMIN_ID, {...articleConfig, id: idx + ARTICLE_INDEX_OFFSET}));
 
     try {
-      await fs.writeFile(FILE_NAME, generator.generateSql());
+      await fs.writeFile(FILE_NAME, generator.getSqlData());
       console.log(chalk.green(`Данные успешно сгенерированы`));
     } catch (err) {
       console.error(chalk.red(`Ошибка при записи моковых данных в файл: ${err}`));

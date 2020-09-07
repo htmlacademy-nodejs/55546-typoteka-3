@@ -7,6 +7,8 @@
 
 -- Started on 2020-08-29 17:52:34
 
+-- ALTER DATABASE _DATABASE_NAME_ SET client_encoding = 'utf8'
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;

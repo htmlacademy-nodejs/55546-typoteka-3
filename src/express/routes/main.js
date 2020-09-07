@@ -23,7 +23,7 @@ appRouter.get(`/`, async (req, res) => {
   }
 
   res.render(`main`, {
-    categories: await req.requestHelper.getAllCategories(),
+    categories: await req.requestHelper.getAllCategories(true),
     articles: data.articles,
     popularArticles: await req.requestHelper.getPopularArticles(),
     lastComments: await req.axios.get(`/api/comments/last`)
@@ -42,7 +42,6 @@ appRouter.get(`/my`, authenticate, async (req, res) => {
     articles = (await req.axios.get(`/api/articles`)).data;
   } catch (err) {
     logger.error(`Ошибка при получении списка статей пользователя`);
-    return;
   }
 
   res.render(`personal-publications`, {articles});
@@ -54,7 +53,6 @@ appRouter.get(`/my/comments`, authenticate, async (req, res) => {
     comments = (await req.axios.get(`/api/comments/all`)).data;
   } catch (err) {
     logger.error(`Ошибка при получении списка предложений`);
-    return;
   }
 
   res.render(`personal-comments`, {comments});

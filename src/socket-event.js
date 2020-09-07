@@ -5,5 +5,5 @@ module.exports.SocketEvent = {
   CONNECTION: `connection`,
   DISCONNECT: `disconnect`,
   UPDATE_COMMENTS: `update-comments`,
-  UPDATE_ARTICLESS: `update-articles`,
+  UPDATE_ARTICLES: `update-articles`,
 };

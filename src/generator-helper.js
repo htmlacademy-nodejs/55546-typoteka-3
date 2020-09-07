@@ -23,31 +23,7 @@ module.exports = class GeneratorHelper {
     this._categoriesInit();
   }
 
-  createUser(config) {
-    this.users.push({...config, id: config.id || ITEM_DEFAULT_ID});
-    return config;
-  }
-
-  createArticle(authorId, config) {
-    const {titles, sentences} = this.data;
-
-    const article = {
-      id: config.id || ITEM_DEFAULT_ID,
-      authorId,
-      title: titles[getRandomInt(0, titles.length - 1)],
-      announce: shuffle(sentences.slice()).slice(0, getRandomInt(MIN_ITEM_COUNT, config.maxAnnounceCount)).join(` `),
-      fullText: shuffle(sentences.slice()).slice(0, getRandomInt(MIN_ITEM_COUNT, sentences.length)).join(` `),
-      dateCreate: getRandomDate(MONTH_DIFFERENCE),
-    };
-
-    this.articles.push(article);
-    this._addArticleCategories(article.id);
-    this._addArticleComments(article.id, authorId, config);
-
-    return article;
-  }
-
-  generateSql() {
+  getSqlData() {
     const {categories, users, articles, arcticlesCategory, comments} = this;
 
     this._addSqlInsert(`users`, [`id`, `name`, `surname`, `email`, `password`],
@@ -71,6 +47,30 @@ module.exports = class GeneratorHelper {
         comments.map((it) => [it.id, it.articleId, it.authorId, `'${it.text}'`, `'${it.dateCreate}'`]));
 
     return this.sqlData.join(``);
+  }
+
+  createUser(config) {
+    this.users.push({...config, id: config.id || ITEM_DEFAULT_ID});
+    return config;
+  }
+
+  createArticle(authorId, config) {
+    const {titles, sentences} = this.data;
+
+    const article = {
+      id: config.id || ITEM_DEFAULT_ID,
+      authorId,
+      title: titles[getRandomInt(0, titles.length - 1)],
+      announce: shuffle(sentences.slice()).slice(0, getRandomInt(MIN_ITEM_COUNT, config.maxAnnounceCount)).join(` `),
+      fullText: shuffle(sentences.slice()).slice(0, getRandomInt(MIN_ITEM_COUNT, sentences.length)).join(` `),
+      dateCreate: getRandomDate(MONTH_DIFFERENCE),
+    };
+
+    this.articles.push(article);
+    this._addArticleCategories(article.id);
+    this._addArticleComments(article.id, authorId, config);
+
+    return article;
   }
 
   _categoriesInit() {
