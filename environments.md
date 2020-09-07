@@ -12,6 +12,8 @@ https://yadi.sk/i/dfwQpN7GAg2Gbw
 
 ## env переменные
 
+Добавить файл `.env` в корень проекта
+
 ## Общие
 `PORT` - порт на котором будет работать сервер
 
@@ -22,3 +24,7 @@ https://yadi.sk/i/dfwQpN7GAg2Gbw
 `DB_PGUSER` - пользователь
 `DB_PGDATABASE` - база данных
 `DB_PGPASSWORD` - пароль
+
+## Проект на heroku
+
+https://arcmag-typoteka-project-2.herokuapp.com/
