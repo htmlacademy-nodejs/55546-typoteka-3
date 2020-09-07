@@ -17,11 +17,12 @@ const {SocketEvent} = require(`../../socket-event`);
 const ARTICLE_UPLOADED_PATH = `${UPLOADED_PATH}/articles`;
 const FIRST_PAGE = 1;
 const DEFAULT_ARTICLES_COUNT = 0;
+const CORRECT_DATE_FORMAT = `HH:mm:ss`;
 
 const route = router();
 const multerStorage = multer.diskStorage(createMulterStorage(ARTICLE_UPLOADED_PATH));
 
-const getCorrectDate = (date) => date ? new Date(`${date.split(`.`).reverse().join(`.`)} ${moment().format(`HH:mm:ss`)}`) : new Date();
+const getCorrectDate = (date) => date ? new Date(`${date.split(`.`).reverse().join(`.`)} ${moment().format(CORRECT_DATE_FORMAT)}`) : new Date();
 
 route.post(`/delete/:id`, authenticate, async (req, res) => {
   const article = await req.requestHelper.getArticleById(req.params.id, `/my`);
