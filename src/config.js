@@ -3,8 +3,10 @@
 const dotenv = require(`dotenv`);
 const result = dotenv.config();
 
-if (result.error) {
-  throw result.error;
-}
+module.exports = Object.assign({}, result.error ? {} : result.parsed);
 
-module.exports = Object.assign({}, result.parsed);
+// if (result.error) {
+//   throw result.error;
+// }
+
+// module.exports = Object.assign({}, result.parsed);
