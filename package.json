@@ -6,7 +6,8 @@
   "scripts": {
     "server": "nodemon ./src/service/service.js --server",
     "fill": "node ./src/service/service.js --fill",
-    "start": "set LOG_LEVEL=error && npm run server > src/service/logs/app.log 2> src/service/logs/error.log",
+    "start": "npm run start-front-server",
+    "start-work": "set LOG_LEVEL=error && npm run server > src/service/logs/app.log 2> src/service/logs/error.log",
     "start::debug": "set LOG_LEVEL=debug && npm run server | pino-pretty > src/service/logs/app.log 2> src/service/logs/error.log",
     "start-front-server": "node src/service/service.js --server",
     "offer-generate": "node src/service/service.js --generate",
