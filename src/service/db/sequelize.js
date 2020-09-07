@@ -1,7 +1,5 @@
 'use strict';
 
-console.log(`------------------sequelize-START`);
-
 const config = require(`../../config`);
 const {Sequelize} = require(`sequelize`);
 
@@ -12,9 +10,6 @@ const Comment = require(`../../express/models/comment`);
 const User = require(`../../express/models/user`);
 
 let sequelize = null;
-
-console.log(`-------------config`, config);
-
 if (config.DATABASE_URL) {
   sequelize = new Sequelize(config.DATABASE_URL, {
     dialect: `postgres`,
@@ -31,16 +26,6 @@ if (config.DATABASE_URL) {
         logging: false
       });
 }
-
-// const sequelize = new Sequelize(
-//     config.DB_PGDATABASE,
-//     config.DB_PGUSER,
-//     config.DB_PGPASSWORD, {
-//       dialect: `postgres`,
-//       host: config.DB_PGHOST,
-//       port: config.DB_PGPORT,
-//       logging: false
-//     });
 
 const models = {
   Article: Article.init(sequelize, Sequelize),

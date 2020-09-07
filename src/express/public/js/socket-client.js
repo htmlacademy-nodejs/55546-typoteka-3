@@ -33,7 +33,7 @@
 
   socket.addEventListener(SocketEvent.UPDATE_COMMENTS, ({article, author, limitText}) => {
     const items = [createElement(`<li class="last__list-item">
-      <img class="last__list-image" src="/upload/users/${author.avatar}" width="20" height="20" alt="Аватар пользователя">
+      <img class="last__list-image" src="${author.avatarPath}" width="20" height="20" alt="Аватар пользователя">
       <b class="last__list-name">${author.name} ${author.surname}</b>
       <a class="last__list-link" href="/articles/${article.id}">
         ${limitText}
